@@ -316,7 +316,7 @@
                                 </a>
                             </li>
                             <li class="social-link">
-                                <a href="mailto:me@tomashevi.ch">
+                                <a href="#" id="email-link-handler">
                                     <img src="./icons/mail.svg" alt="mail-icon" />
                                     <span>
                                         <span class="email-user">me</span><span class="email-domain">tomashevi</span>ch
@@ -328,5 +328,14 @@
                 </section>
             </main>
         </div>
+        <script>
+            const emailLink = document.getElementById('email-link-handler');
+            emailLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                const user = 'me';
+                const domain = 'tomashevi.ch';
+                window.location.href = `mailto:${user}@${domain}`;
+            });
+        </script>
     </body>
 </html>
