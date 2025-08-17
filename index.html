@@ -207,13 +207,23 @@
                 flex-grow: 1;
                 display: flex;
                 flex-direction: column;
+                position: relative;
             }
 
             #infinite-canvas {
                 width: 100%;
                 height: 100%;
-                border: 1px solid var(--default);
                 image-rendering: pixelated;
+                background-color: #a8d8f0;
+            }
+
+            #bubble-canvas {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: none;
             }
         </style>
     </head>
@@ -257,6 +267,7 @@
                 </section>
                 <section id="infinite-canvas-section">
                     <canvas id="infinite-canvas"></canvas>
+                    <canvas id="bubble-canvas"></canvas>
                 </section>
             </main>
         </div>
@@ -697,6 +708,62 @@
 
             addMoreFish();
             setInterval(addMoreFish, 10000);
+
+            const bubbleCanvas = document.getElementById("bubble-canvas");
+            const bubbleCtx = bubbleCanvas.getContext("2d");
+
+            // Resize bubble canvas to match fish canvas
+            const resizeObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    bubbleCanvas.width = entry.target.width;
+                    bubbleCanvas.height = entry.target.height;
+                }
+            });
+            resizeObserver.observe(infiniteCanvas);
+
+
+            class Bubble {
+                constructor() {
+                    this.x = Math.random() * bubbleCanvas.width;
+                    this.y = bubbleCanvas.height + Math.random() * 100;
+                    this.radius = Math.random() * 3 + 1;
+                    this.speedY = Math.random() * 0.5 + 0.2;
+                }
+
+                update() {
+                    this.y -= this.speedY;
+                }
+
+                draw() {
+                    bubbleCtx.beginPath();
+                    bubbleCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    bubbleCtx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    bubbleCtx.fill();
+                }
+            }
+
+            const bubbles = [];
+
+            function animateBubbles() {
+                bubbleCtx.clearRect(0, 0, bubbleCanvas.width, bubbleCanvas.height);
+
+                if (Math.random() < 0.1) {
+                    bubbles.push(new Bubble());
+                }
+
+                for (let i = bubbles.length - 1; i >= 0; i--) {
+                    bubbles[i].update();
+                    bubbles[i].draw();
+
+                    if (bubbles[i].y < -bubbles[i].radius) {
+                        bubbles.splice(i, 1);
+                    }
+                }
+
+                requestAnimationFrame(animateBubbles);
+            }
+
+            animateBubbles();
         </script>
     </body>
 </html>
