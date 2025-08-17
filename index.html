@@ -84,29 +84,23 @@
             }
 
             /* Components */
-            .nav-links ol {
-                list-style-type: none;
-                padding: 0;
-                margin: 0;
+            .nav-links {
                 display: flex;
                 gap: 1.5rem;
             }
 
-            .nav-link a {
+            .nav-link {
                 color: var(--secondary);
                 padding: 0.5rem 1rem;
                 border-radius: 8px;
             }
 
-            .nav-link a:hover {
+            .nav-link:hover {
                 color: var(--background);
                 background-color: var(--primary);
             }
 
-            .social-links ol {
-                list-style-type: none;
-                padding: 0;
-                margin: 0;
+            .social-links {
                 display: flex;
                 gap: 1rem;
                 flex-wrap: wrap;
@@ -119,9 +113,6 @@
                 transition:
                     background-color 0.3s,
                     border-color 0.3s;
-            }
-
-            .social-link a {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -152,14 +143,6 @@
 
             .social-link:hover span {
                 color: var(--background);
-            }
-
-            .email-user::after {
-                content: "@";
-            }
-
-            .email-domain::after {
-                content: ".";
             }
 
             .interests-list {
@@ -262,11 +245,9 @@
         <div class="container">
             <header>
                 <nav class="nav-links" aria-label="Main navigation">
-                    <ol>
-                        <li class="nav-link">home</li>
-                        <li class="nav-link"><a href="/projects">projects</a></li>
-                        <li class="nav-link"><a href="/rewind">rewinds</a></li>
-                    </ol>
+                    <a href="#" class="nav-link">home</a>
+                    <a href="/projects" class="nav-link">projects</a>
+                    <a href="/rewind" class="nav-link">rewinds</a>
                 </nav>
             </header>
             <main>
@@ -350,34 +331,24 @@
                 </section>
                 <section>
                     <h2>You can find me here</h2>
-                    <div class="social-links" aria-label="Social media links">
-                        <ol>
-                            <li class="social-link">
-                                <a href="https://t.me/tomashevich" target="_blank" rel="noopener noreferrer">
-                                    <img src="./icons/telegram.svg" alt="Telegram" />
-                                    <span>@tomashevich</span>
-                                </a>
-                            </li>
-                            <li class="social-link">
-                                <a href="https://github.com/tomashevich" target="_blank" rel="noopener noreferrer">
-                                    <img src="./icons/github.svg" alt="GitHub" />
-                                    <span>@tomashevich</span>
-                                </a>
-                            </li>
-                            <li class="social-link">
-                                <a href="https://youtube.com/@tomashevich" target="_blank" rel="noopener noreferrer">
-                                    <img src="./icons/youtube.svg" alt="YouTube" />
-                                    <span>@tomashevich</span>
-                                </a>
-                            </li>
-                            <li class="social-link">
-                                <a href="#" id="email-link-handler">
-                                    <img src="./icons/mail.svg" alt="Email" />
-                                    <span> <span class="email-user">me</span><span class="email-domain">tomashevi</span>ch </span>
-                                </a>
-                            </li>
-                        </ol>
-                    </div>
+                    <nav class="social-links" aria-label="Social media links">
+                        <a href="https://t.me/tomashevich" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <img src="./icons/telegram.svg" alt="Telegram" />
+                            <span>@tomashevich</span>
+                        </a>
+                        <a href="https://github.com/tomashevich" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <img src="./icons/github.svg" alt="GitHub" />
+                            <span>@tomashevich</span>
+                        </a>
+                        <a href="https://youtube.com/@tomashevich" target="_blank" rel="noopener noreferrer" class="social-link">
+                            <img src="./icons/youtube.svg" alt="YouTube" />
+                            <span>@tomashevich</span>
+                        </a>
+                        <a href="mailto:me@tomashevi.ch" class="social-link">
+                            <img src="./icons/mail.svg" alt="Email" />
+                            <span>me@tomashevi.ch</span>
+                        </a>
+                    </nav>
                 </section>
             </main>
         </div>
@@ -392,9 +363,6 @@
                         fill="none"
                         stroke="currentColor"
                         stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="feather feather-rewind"
                     >
                         <polygon points="11 19 2 12 11 5 11 19"></polygon>
                         <polygon points="22 19 13 12 22 5 22 19"></polygon>
@@ -410,9 +378,6 @@
                         fill="none"
                         stroke="currentColor"
                         stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="feather feather-fast-forward"
                     >
                         <polygon points="13 19 22 12 13 5 13 19"></polygon>
                         <polygon points="2 19 11 12 2 5 2 19"></polygon>
@@ -422,24 +387,28 @@
         </footer>
         <script>
             class PixelBattle {
-                constructor(canvasId, text, pixelSize, font) {
+                constructor(canvasId, text, font) {
                     this.canvas = document.getElementById(canvasId);
+                    if (!this.canvas) {
+                        console.error(`Canvas with id "${canvasId}" not found.`);
+                        return;
+                    }
                     this.ctx = this.canvas.getContext("2d");
                     this.text = text;
-                    this.pixelSize = pixelSize;
+                    this.pixelSize = 8;
                     this.font = font;
 
                     this.init();
                 }
 
                 init() {
-                    this.setTextCanvas();
-                    this.setTextPixels();
+                    this.setupCanvas();
+                    this.createTextGrid();
                     this.drawGrid();
                     this.addEventListeners();
                 }
 
-                setTextCanvas() {
+                setupCanvas() {
                     const textCanvas = document.createElement("canvas");
                     const textCtx = textCanvas.getContext("2d");
                     textCtx.font = this.font;
@@ -447,8 +416,8 @@
 
                     this.canvas.width = Math.ceil(textMetrics.width) + 2 * this.pixelSize;
                     this.canvas.height = 300;
-                    this.canvas.style.width = this.canvas.width + "px";
-                    this.canvas.style.height = this.canvas.height + "px";
+                    this.canvas.style.width = `${this.canvas.width}px`;
+                    this.canvas.style.height = `${this.canvas.height}px`;
 
                     textCanvas.width = this.canvas.width;
                     textCanvas.height = this.canvas.height;
@@ -462,29 +431,30 @@
                     this.textCtx = textCtx;
                 }
 
-                setTextPixels() {
-                    const gridWidth = this.canvas.width / this.pixelSize;
-                    const gridHeight = this.canvas.height / this.pixelSize;
+                createTextGrid() {
+                    const gridWidth = Math.floor(this.canvas.width / this.pixelSize);
+                    const gridHeight = Math.floor(this.canvas.height / this.pixelSize);
                     const imageData = this.textCtx.getImageData(0, 0, this.textCanvas.width, this.textCanvas.height);
                     const pixelData = imageData.data;
-                    this.textPixels = [];
+                    this.textPixels = new Array(gridHeight).fill(null).map(() => new Array(gridWidth).fill(false));
 
                     for (let y = 0; y < gridHeight; y++) {
-                        this.textPixels[y] = [];
                         for (let x = 0; x < gridWidth; x++) {
                             const pixelIndex = (y * this.pixelSize * this.textCanvas.width + x * this.pixelSize) * 4;
-                            this.textPixels[y][x] = pixelData[pixelIndex + 3] > 0;
+                            if (pixelData[pixelIndex + 3] > 0) {
+                                this.textPixels[y][x] = true;
+                            }
                         }
                     }
                 }
 
                 drawGrid() {
                     this.ctx.strokeStyle = "#ccc";
-                    const gridWidth = this.canvas.width / this.pixelSize;
-                    const gridHeight = this.canvas.height / this.pixelSize;
+                    const gridWidth = this.textPixels[0].length;
+                    const gridHeight = this.textPixels.length;
 
-                    for (let x = 0; x < gridWidth; x++) {
-                        for (let y = 0; y < gridHeight; y++) {
+                    for (let y = 0; y < gridHeight; y++) {
+                        for (let x = 0; x < gridWidth; x++) {
                             if (this.textPixels[y][x]) {
                                 this.ctx.strokeRect(x * this.pixelSize, y * this.pixelSize, this.pixelSize, this.pixelSize);
                             }
@@ -498,30 +468,20 @@
                         const x = e.clientX - rect.left;
                         const y = e.clientY - rect.top;
 
-                        const gridWidth = this.canvas.width / this.pixelSize;
-                        const gridHeight = this.canvas.height / this.pixelSize;
-
+                        const gridWidth = this.textPixels[0].length;
                         const pixelX = Math.floor(x / (rect.width / gridWidth));
-                        const pixelY = Math.floor(y / (rect.height / gridHeight));
+                        const pixelY = Math.floor(y / (rect.height / this.textPixels.length));
 
-                        if (this.textPixels[pixelY][pixelX]) {
+                        if (this.textPixels[pixelY] && this.textPixels[pixelY][pixelX]) {
                             this.ctx.fillStyle = "red"; // or a color picker
                             this.ctx.fillRect(pixelX * this.pixelSize, pixelY * this.pixelSize, this.pixelSize, this.pixelSize);
-                            this.ctx.strokeRect(pixelX * this.pixelSize, y * this.pixelSize, this.pixelSize, this.pixelSize);
+                            this.ctx.strokeRect(pixelX * this.pixelSize, pixelY * this.pixelSize, this.pixelSize, this.pixelSize);
                         }
                     });
                 }
             }
 
-            const emailLink = document.getElementById("email-link-handler");
-            emailLink.addEventListener("click", (e) => {
-                e.preventDefault();
-                const user = "me";
-                const domain = "tomashevi.ch";
-                window.location.href = `mailto:${user}@${domain}`;
-            });
-
-            new PixelBattle("pixel-canvas", "tomashevi.ch", 8, "bold 200px Lato");
+            new PixelBattle("pixel-canvas", "tomashevi.ch", "bold 200px Lato");
         </script>
     </body>
 </html>
