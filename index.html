@@ -424,186 +424,203 @@
             const infiniteCtx = infiniteCanvas.getContext("2d");
             infiniteCtx.imageSmoothingEnabled = false;
 
-            function getRandomElement(arr) {
-                return arr[Math.floor(Math.random() * arr.length)];
-            }
+            function generateRandomFish(seed) {
+                class SeededRandom {
+                    constructor(seed) {
+                        this.seed = seed;
+                    }
 
-            function generateFishBody(width, height) {
-                const body = Array(height)
-                    .fill(0)
-                    .map(() => Array(width).fill(0));
-                const a = width / 2;
-                const b = height / 2;
-                for (let y = 0; y < height; y++) {
-                    for (let x = 0; x < width; x++) {
-                        if (Math.pow(x - a, 2) / Math.pow(a, 2) + Math.pow(y - b, 2) / Math.pow(b, 2) < 1) {
-                            body[y][x] = 1;
-                        }
+                    next() {
+                        this.seed = (this.seed * 9301 + 49297) % 233280;
+                        return this.seed / 233280;
                     }
                 }
-                return body;
-            }
 
-            function generateFishTail(width, height, type) {
-                const tail = Array(height)
-                    .fill(0)
-                    .map(() => Array(width).fill(0));
-                switch (type) {
-                    case 0:
-                        for (let y = 0; y < height; y++) {
-                            for (let x = 0; x < width; x++) {
-                                if (y >= x && y <= height - x) {
-                                    tail[y][x] = 1;
+                let seedValue = 0;
+                for (let i = 0; i < seed.length; i++) {
+                    seedValue += seed.charCodeAt(i);
+                }
+                const random = new SeededRandom(seedValue);
+
+                function getRandomElement(arr) {
+                    return arr[Math.floor(random.next() * arr.length)];
+                }
+
+                function generateFishBody(width, height) {
+                    const body = Array(height)
+                        .fill(0)
+                        .map(() => Array(width).fill(0));
+                    const a = width / 2;
+                    const b = height / 2;
+                    for (let y = 0; y < height; y++) {
+                        for (let x = 0; x < width; x++) {
+                            if (Math.pow(x - a, 2) / Math.pow(a, 2) + Math.pow(y - b, 2) / Math.pow(b, 2) < 1) {
+                                body[y][x] = 1;
+                            }
+                        }
+                    }
+                    return body;
+                }
+
+                function generateFishTail(width, height, type) {
+                    const tail = Array(height)
+                        .fill(0)
+                        .map(() => Array(width).fill(0));
+                    switch (type) {
+                        case 0:
+                            for (let y = 0; y < height; y++) {
+                                for (let x = 0; x < width; x++) {
+                                    if (y >= x && y <= height - x) {
+                                        tail[y][x] = 1;
+                                    }
+                                }
+                            }
+                            break;
+                        case 1: // Forked tail
+                            for (let y = 0; y < height; y++) {
+                                for (let x = 0; x < width; x++) {
+                                    if (y >= x && y <= height - x && y > height / 2 - 1 && y < height / 2 + 1) {
+                                        tail[y][x] = 0;
+                                    } else if (y >= x && y <= height - x) {
+                                        tail[y][x] = 1;
+                                    }
+                                }
+                            }
+                            break;
+                        case 2: // Long tail
+                            for (let y = 0; y < height; y++) {
+                                for (let x = 0; x < width; x++) {
+                                    if (y > height / 2 - 2 && y < height / 2 + 2) {
+                                        tail[y][x] = 1;
+                                    }
+                                }
+                            }
+                            break;
+                        // Add 7 more tail types
+                        default:
+                            for (let y = 0; y < height; y++) {
+                                for (let x = 0; x < width; x++) {
+                                    if (y >= x && y <= height - x) {
+                                        tail[y][x] = 1;
+                                    }
+                                }
+                            }
+                            break;
+                    }
+                    return tail;
+                }
+
+                function addBodyPatterns(body) {
+                    const patternType = Math.floor(random.next() * 4);
+                    for (let y = 0; y < body.length; y++) {
+                        for (let x = 0; x < body[y].length; x++) {
+                            if (body[y][x] === 1) {
+                                switch (patternType) {
+                                    case 0: // Spots
+                                        if (random.next() > 0.7) {
+                                            body[y][x] = 2;
+                                        }
+                                        break;
+                                    case 1: // Wavy lines
+                                        if (Math.sin(x * 0.5 + y * 0.5) > 0.5) {
+                                            body[y][x] = 2;
+                                        }
+                                        break;
+                                    case 2: // Lines
+                                        if (y % 3 === 0) {
+                                            body[y][x] = 2;
+                                        }
+                                        break;
+                                    case 3: // Crosses
+                                        if (x % 4 === 0 || y % 4 === 0) {
+                                            body[y][x] = 2;
+                                        }
+                                        break;
                                 }
                             }
                         }
-                        break;
-                    case 1: // Forked tail
-                        for (let y = 0; y < height; y++) {
-                            for (let x = 0; x < width; x++) {
-                                if (y >= x && y <= height - x && y > height / 2 - 1 && y < height / 2 + 1) {
-                                    tail[y][x] = 0;
-                                } else if (y >= x && y <= height - x) {
-                                    tail[y][x] = 1;
-                                }
-                            }
-                        }
-                        break;
-                    case 2: // Long tail
-                        for (let y = 0; y < height; y++) {
-                            for (let x = 0; x < width; x++) {
-                                if (y > height / 2 - 2 && y < height / 2 + 2) {
-                                    tail[y][x] = 1;
-                                }
-                            }
-                        }
-                        break;
-                    // Add 7 more tail types
-                    default:
-                        for (let y = 0; y < height; y++) {
-                            for (let x = 0; x < width; x++) {
-                                if (y >= x && y <= height - x) {
-                                    tail[y][x] = 1;
-                                }
-                            }
-                        }
-                        break;
+                    }
+                    return body;
                 }
-                return tail;
-            }
 
-            function addBodyPatterns(body) {
-                const patternType = Math.floor(Math.random() * 4);
-                for (let y = 0; y < body.length; y++) {
-                    for (let x = 0; x < body[y].length; x++) {
-                        if (body[y][x] === 1) {
-                            switch (patternType) {
-                                case 0: // Spots
-                                    if (Math.random() > 0.7) {
-                                        body[y][x] = 2;
-                                    }
-                                    break;
-                                case 1: // Wavy lines
-                                    if (Math.sin(x * 0.5 + y * 0.5) > 0.5) {
-                                        body[y][x] = 2;
-                                    }
-                                    break;
-                                case 2: // Lines
-                                    if (y % 3 === 0) {
-                                        body[y][x] = 2;
-                                    }
-                                    break;
-                                case 3: // Crosses
-                                    if (x % 4 === 0 || y % 4 === 0) {
-                                        body[y][x] = 2;
-                                    }
-                                    break;
+                function addAnglerfishLight(head) {
+                    const lightX = Math.floor(head[0].length / 2);
+                    for (let y = 0; y < head.length / 2; y++) {
+                        head[y][lightX] = 5; // Light color index
+                    }
+                    head[0][lightX] = 0;
+                    head[1][lightX - 1] = 5;
+                    head[1][lightX + 1] = 5;
+                    return head;
+                }
+
+                function generateProceduralPalette() {
+                    const baseHue = random.next() * 360;
+                    const palette = {
+                        1: `hsl(${baseHue}, 70%, 50%)`,
+                        2: `hsl(${(baseHue + 120) % 360}, 70%, 60%)`,
+                        3: "#000000",
+                        4: "#ffffff",
+                        5: "#ffff00", // Light color
+                    };
+                    return palette;
+                }
+
+                function combineParts(parts) {
+                    const tail = parts.tail;
+                    const body = parts.body;
+                    const head = parts.head;
+
+                    const fishWidth = tail[0].length + body[0].length + head[0].length - 4; // Overlap by 2 pixels on each side
+                    const fishHeight = body.length;
+                    const fishData = Array(fishHeight)
+                        .fill(0)
+                        .map(() => Array(fishWidth).fill(0));
+
+                    // Draw tail
+                    for (let y = 0; y < tail.length; y++) {
+                        for (let x = 0; x < tail[y].length; x++) {
+                            if (tail[y][x]) {
+                                fishData[y][x] = tail[y][x];
                             }
                         }
                     }
-                }
-                return body;
-            }
 
-            function addAnglerfishLight(head) {
-                const lightX = Math.floor(head[0].length / 2);
-                for (let y = 0; y < head.length / 2; y++) {
-                    head[y][lightX] = 5; // Light color index
-                }
-                head[0][lightX] = 0;
-                head[1][lightX - 1] = 5;
-                head[1][lightX + 1] = 5;
-                return head;
-            }
-
-            function generateProceduralPalette() {
-                const baseHue = Math.random() * 360;
-                const palette = {
-                    1: `hsl(${baseHue}, 70%, 50%)`,
-                    2: `hsl(${(baseHue + 120) % 360}, 70%, 60%)`,
-                    3: "#000000",
-                    4: "#ffffff",
-                    5: "#ffff00", // Light color
-                };
-                return palette;
-            }
-
-            function combineParts(parts) {
-                const tail = parts.tail;
-                const body = parts.body;
-                const head = parts.head;
-
-                const fishWidth = tail[0].length + body[0].length + head[0].length - 4; // Overlap by 2 pixels on each side
-                const fishHeight = body.length;
-                const fishData = Array(fishHeight)
-                    .fill(0)
-                    .map(() => Array(fishWidth).fill(0));
-
-                // Draw tail
-                for (let y = 0; y < tail.length; y++) {
-                    for (let x = 0; x < tail[y].length; x++) {
-                        if (tail[y][x]) {
-                            fishData[y][x] = tail[y][x];
+                    // Draw body
+                    let currentX = tail[0].length - 2;
+                    for (let y = 0; y < body.length; y++) {
+                        for (let x = 0; x < body[y].length; x++) {
+                            if (body[y][x]) {
+                                fishData[y][currentX + x] = body[y][x];
+                            }
                         }
                     }
-                }
 
-                // Draw body
-                let currentX = tail[0].length - 2;
-                for (let y = 0; y < body.length; y++) {
-                    for (let x = 0; x < body[y].length; x++) {
-                        if (body[y][x]) {
-                            fishData[y][currentX + x] = body[y][x];
+                    // Draw head
+                    currentX += body[0].length - 2;
+                    for (let y = 0; y < head.length; y++) {
+                        for (let x = 0; x < head[y].length; x++) {
+                            if (head[y][x]) {
+                                fishData[y][currentX + x] = head[y][x];
+                            }
                         }
                     }
+
+                    return fishData;
                 }
 
-                // Draw head
-                currentX += body[0].length - 2;
-                for (let y = 0; y < head.length; y++) {
-                    for (let x = 0; x < head[y].length; x++) {
-                        if (head[y][x]) {
-                            fishData[y][currentX + x] = head[y][x];
-                        }
-                    }
-                }
+                const hasTeeth = random.next() > 0.8;
+                const hasAnglerfishLight = random.next() > 0.9;
+                const hasPatterns = random.next() > 0.5;
 
-                return fishData;
-            }
-
-            function generateRandomFish() {
-                const hasTeeth = Math.random() > 0.8;
-                const hasAnglerfishLight = Math.random() > 0.9;
-                const hasPatterns = Math.random() > 0.5;
-
-                const headHeight = Math.floor(Math.random() * 4) + 8;
+                const headHeight = Math.floor(random.next() * 4) + 8;
                 const bodyHeight = headHeight;
                 const tailHeight = headHeight;
 
-                const headWidth = Math.floor(Math.random() * 2) + 6;
-                const bodyWidth = Math.floor(Math.random() * 8) + 10;
-                const tailWidth = Math.floor(Math.random() * 3) + 5;
-                const tailType = Math.floor(Math.random() * 10);
+                const headWidth = Math.floor(random.next() * 2) + 6;
+                const bodyWidth = Math.floor(random.next() * 8) + 10;
+                const tailWidth = Math.floor(random.next() * 3) + 5;
+                const tailType = Math.floor(random.next() * 10);
 
                 let body = generateFishBody(bodyWidth, bodyHeight);
                 if (hasPatterns) {
@@ -629,7 +646,7 @@
                 // Add teeth
                 if (hasTeeth) {
                     for (let i = 0; i < headWidth; i++) {
-                        if (i > headWidth / 2 && Math.random() > 0.5) {
+                        if (i > headWidth / 2 && random.next() > 0.5) {
                             parts.head[headHeight - 2][i] = 4;
                         }
                     }
@@ -637,15 +654,18 @@
 
                 const fishData = combineParts(parts);
                 const palette = generateProceduralPalette();
-                const scale = Math.random() * 0.3 + 0.3;
+                const scale = random.next() * 0.3 + 0.3;
 
-                return new Fish(infiniteCtx, fishData, palette, 4, scale);
+                const fish = new Fish(infiniteCtx, fishData, palette, 4, scale);
+                const x = random.next() * (infiniteCanvas.width - 45);
+                const y = random.next() * (infiniteCanvas.height - 20);
+
+                return { fish, x, y };
             }
 
             for (let i = 0; i < 20; i++) {
-                const fish = generateRandomFish();
-                const x = Math.random() * (infiniteCanvas.width - 35);
-                const y = Math.random() * (infiniteCanvas.height - 30);
+                const seed = `fish-seed-${i}`;
+                const { fish, x, y } = generateRandomFish(seed);
                 fish.draw(x, y);
             }
         </script>
