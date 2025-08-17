@@ -101,9 +101,9 @@
             }
 
             .social-links {
-                display: flex;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
                 gap: 1rem;
-                flex-wrap: wrap;
             }
 
             .social-link {
@@ -114,20 +114,19 @@
                     background-color 0.3s,
                     border-color 0.3s;
                 display: flex;
-                flex-direction: column;
                 align-items: center;
                 text-decoration: none;
-                gap: 0.5rem;
+                gap: 1rem;
             }
 
             .social-link img {
-                width: 72px;
-                height: 72px;
+                width: 32px;
+                height: 32px;
                 transition: filter 0.3s;
             }
 
             .social-link span {
-                font-size: 0.75rem;
+                font-size: 1rem;
                 color: var(--default);
                 transition: color 0.3s;
             }
@@ -145,48 +144,12 @@
                 color: var(--background);
             }
 
-            .interests-list {
-                list-style-type: none;
-                padding: 0;
-                margin: 0;
-                display: flex;
-                flex-direction: column;
-                gap: 1.5rem;
+            .email-user::after {
+                content: "@";
             }
 
-            .interest-item {
-                display: flex;
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            .interest-info {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-            .interest-name {
-                font-weight: bold;
-            }
-
-            .interest-level {
-                font-size: 0.9rem;
-                color: var(--secondary);
-            }
-
-            .progress-bar {
-                width: 100%;
-                height: 0.5rem;
-                background-color: var(--secondary);
-                border-radius: 0.25rem;
-                overflow: hidden;
-            }
-
-            .progress {
-                height: 100%;
-                background-color: var(--primary);
-                border-radius: 0.25rem;
+            .email-domain::after {
+                content: ".";
             }
 
             .player-footer {
@@ -252,82 +215,8 @@
             </header>
             <main>
                 <section>
-                    <h1>Slava</h1>
-                    <p>he/him who loves making elegant solutions for interesting products</p>
-                </section>
-                <section>
-                    <h2>What I'm interested in</h2>
-                    <ul class="interests-list">
-                        <li
-                            class="interest-item"
-                            title="i love building stuff that helps people and solves their problems. Seeing them interested in my product is the best reward"
-                        >
-                            <div class="interest-info">
-                                <span class="interest-name">🚀 Entrepreneurship</span>
-                                <span class="interest-level">10/10</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 100%"></div>
-                            </div>
-                        </li>
-                        <li
-                            class="interest-item"
-                            title="cs gives you superpowers. with good knowledge, there are no limits to what you can create"
-                        >
-                            <div class="interest-info">
-                                <span class="interest-name">💻 Programming</span>
-                                <span class="interest-level">9/10</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 90%"></div>
-                            </div>
-                        </li>
-                        <li class="interest-item" title="im curious about how things work under the hood. only as white hat">
-                            <div class="interest-info">
-                                <span class="interest-name">🕵️ Pentesting</span>
-                                <span class="interest-level">6/10</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 60%"></div>
-                            </div>
-                        </li>
-                        <li class="interest-item" title="a tool from the future to build real freedom">
-                            <div class="interest-info">
-                                <span class="interest-name">⛓️ Blockchain</span>
-                                <span class="interest-level">7/10</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 70%"></div>
-                            </div>
-                        </li>
-                        <li class="interest-item" title="know your rights in order not to disrespect others and yourself">
-                            <div class="interest-info">
-                                <span class="interest-name">⚖️ Jurisprudence</span>
-                                <span class="interest-level">8/10</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 80%"></div>
-                            </div>
-                        </li>
-                        <li class="interest-item" title="just try it lol">
-                            <div class="interest-info">
-                                <span class="interest-name">🪂 Skydiving</span>
-                                <span class="interest-level">10/10</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 100%"></div>
-                            </div>
-                        </li>
-                        <li class="interest-item" title="flying makes you feel free to go anywhere, above all 'earthly' problems">
-                            <div class="interest-info">
-                                <span class="interest-name">✈️ Aviation</span>
-                                <span class="interest-level">10/10</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress" style="width: 100%"></div>
-                            </div>
-                        </li>
-                    </ul>
+                    <h1>Hey there!</h1>
+                    <p>im a he/him who loves making elegant solutions for interesting products</p>
                 </section>
                 <section>
                     <h2>You can find me here</h2>
@@ -344,9 +233,9 @@
                             <img src="./icons/youtube.svg" alt="YouTube" />
                             <span>@tomashevich</span>
                         </a>
-                        <a href="mailto:me@tomashevi.ch" class="social-link">
+                        <a href="#" id="email-link-handler" class="social-link">
                             <img src="./icons/mail.svg" alt="Email" />
-                            <span>me@tomashevi.ch</span>
+                            <span><span class="email-user">me</span><span class="email-domain">tomashevi</span>ch</span>
                         </a>
                     </nav>
                 </section>
@@ -480,6 +369,14 @@
                     });
                 }
             }
+
+            const emailLink = document.getElementById("email-link-handler");
+            emailLink.addEventListener("click", (e) => {
+                e.preventDefault();
+                const user = "me";
+                const domain = "tomashevi.ch";
+                window.location.href = `mailto:${user}@${domain}`;
+            });
 
             new PixelBattle("pixel-canvas", "tomashevi.ch", "bold 200px Lato");
         </script>
