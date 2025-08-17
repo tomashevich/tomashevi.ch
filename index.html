@@ -9,6 +9,7 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;900&display=swap" rel="stylesheet" />
         <style>
+            /* General styles */
             :root {
                 --default: #2f4f4f;
                 --primary: #007bff;
@@ -65,6 +66,7 @@
                 margin: 0;
             }
 
+            /* Layout */
             .container {
                 width: 100%;
                 max-width: 640px;
@@ -81,6 +83,7 @@
                 gap: 3rem;
             }
 
+            /* Components */
             .nav-links ol {
                 list-style-type: none;
                 padding: 0;
@@ -202,6 +205,7 @@
                 background-color: var(--primary);
                 border-radius: 0.25rem;
             }
+
             .player-footer {
                 position: fixed;
                 bottom: 1rem;
@@ -350,25 +354,25 @@
                         <ol>
                             <li class="social-link">
                                 <a href="https://t.me/tomashevich" target="_blank" rel="noopener noreferrer">
-                                    <img src="./icons/telegram.svg" alt="telegram-icon" />
+                                    <img src="./icons/telegram.svg" alt="Telegram" />
                                     <span>@tomashevich</span>
                                 </a>
                             </li>
                             <li class="social-link">
                                 <a href="https://github.com/tomashevich" target="_blank" rel="noopener noreferrer">
-                                    <img src="./icons/github.svg" alt="github-icon" />
+                                    <img src="./icons/github.svg" alt="GitHub" />
                                     <span>@tomashevich</span>
                                 </a>
                             </li>
                             <li class="social-link">
                                 <a href="https://youtube.com/@tomashevich" target="_blank" rel="noopener noreferrer">
-                                    <img src="./icons/youtube.svg" alt="youtube-icon" />
+                                    <img src="./icons/youtube.svg" alt="YouTube" />
                                     <span>@tomashevich</span>
                                 </a>
                             </li>
                             <li class="social-link">
                                 <a href="#" id="email-link-handler">
-                                    <img src="./icons/mail.svg" alt="mail-icon" />
+                                    <img src="./icons/mail.svg" alt="Email" />
                                     <span> <span class="email-user">me</span><span class="email-domain">tomashevi</span>ch </span>
                                 </a>
                             </li>
@@ -417,6 +421,98 @@
             </div>
         </footer>
         <script>
+            class PixelBattle {
+                constructor(canvasId, text, pixelSize, font) {
+                    this.canvas = document.getElementById(canvasId);
+                    this.ctx = this.canvas.getContext("2d");
+                    this.text = text;
+                    this.pixelSize = pixelSize;
+                    this.font = font;
+
+                    this.init();
+                }
+
+                init() {
+                    this.setTextCanvas();
+                    this.setTextPixels();
+                    this.drawGrid();
+                    this.addEventListeners();
+                }
+
+                setTextCanvas() {
+                    const textCanvas = document.createElement("canvas");
+                    const textCtx = textCanvas.getContext("2d");
+                    textCtx.font = this.font;
+                    const textMetrics = textCtx.measureText(this.text);
+
+                    this.canvas.width = Math.ceil(textMetrics.width) + 2 * this.pixelSize;
+                    this.canvas.height = 300;
+                    this.canvas.style.width = this.canvas.width + "px";
+                    this.canvas.style.height = this.canvas.height + "px";
+
+                    textCanvas.width = this.canvas.width;
+                    textCanvas.height = this.canvas.height;
+                    textCtx.font = this.font;
+                    textCtx.fillStyle = "#000";
+                    textCtx.textAlign = "center";
+                    textCtx.textBaseline = "middle";
+                    textCtx.fillText(this.text, textCanvas.width / 2, textCanvas.height / 2);
+
+                    this.textCanvas = textCanvas;
+                    this.textCtx = textCtx;
+                }
+
+                setTextPixels() {
+                    const gridWidth = this.canvas.width / this.pixelSize;
+                    const gridHeight = this.canvas.height / this.pixelSize;
+                    const imageData = this.textCtx.getImageData(0, 0, this.textCanvas.width, this.textCanvas.height);
+                    const pixelData = imageData.data;
+                    this.textPixels = [];
+
+                    for (let y = 0; y < gridHeight; y++) {
+                        this.textPixels[y] = [];
+                        for (let x = 0; x < gridWidth; x++) {
+                            const pixelIndex = (y * this.pixelSize * this.textCanvas.width + x * this.pixelSize) * 4;
+                            this.textPixels[y][x] = pixelData[pixelIndex + 3] > 0;
+                        }
+                    }
+                }
+
+                drawGrid() {
+                    this.ctx.strokeStyle = "#ccc";
+                    const gridWidth = this.canvas.width / this.pixelSize;
+                    const gridHeight = this.canvas.height / this.pixelSize;
+
+                    for (let x = 0; x < gridWidth; x++) {
+                        for (let y = 0; y < gridHeight; y++) {
+                            if (this.textPixels[y][x]) {
+                                this.ctx.strokeRect(x * this.pixelSize, y * this.pixelSize, this.pixelSize, this.pixelSize);
+                            }
+                        }
+                    }
+                }
+
+                addEventListeners() {
+                    this.canvas.addEventListener("click", (e) => {
+                        const rect = this.canvas.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+
+                        const gridWidth = this.canvas.width / this.pixelSize;
+                        const gridHeight = this.canvas.height / this.pixelSize;
+
+                        const pixelX = Math.floor(x / (rect.width / gridWidth));
+                        const pixelY = Math.floor(y / (rect.height / gridHeight));
+
+                        if (this.textPixels[pixelY][pixelX]) {
+                            this.ctx.fillStyle = "red"; // or a color picker
+                            this.ctx.fillRect(pixelX * this.pixelSize, pixelY * this.pixelSize, this.pixelSize, this.pixelSize);
+                            this.ctx.strokeRect(pixelX * this.pixelSize, y * this.pixelSize, this.pixelSize, this.pixelSize);
+                        }
+                    });
+                }
+            }
+
             const emailLink = document.getElementById("email-link-handler");
             emailLink.addEventListener("click", (e) => {
                 e.preventDefault();
@@ -425,75 +521,7 @@
                 window.location.href = `mailto:${user}@${domain}`;
             });
 
-            const canvas = document.getElementById("pixel-canvas");
-            const ctx = canvas.getContext("2d");
-            const pixelSize = 8;
-
-            const text = "tomashevi.ch";
-            const textCanvas = document.createElement("canvas");
-            const textCtx = textCanvas.getContext("2d");
-            textCtx.font = "bold 200px Lato";
-            const textMetrics = textCtx.measureText(text);
-
-            canvas.width = Math.ceil(textMetrics.width) + 2 * pixelSize;
-            canvas.height = 300;
-            canvas.style.width = canvas.width + "px";
-            canvas.style.height = canvas.height + "px";
-
-            textCanvas.width = canvas.width;
-            textCanvas.height = canvas.height;
-            textCtx.font = "bold 200px Lato";
-            textCtx.fillStyle = "#000";
-            textCtx.textAlign = "center";
-            textCtx.textBaseline = "middle";
-            textCtx.fillText(text, textCanvas.width / 2, textCanvas.height / 2);
-
-            const gridWidth = canvas.width / pixelSize;
-            const gridHeight = canvas.height / pixelSize;
-
-            const imageData = textCtx.getImageData(0, 0, textCanvas.width, textCanvas.height);
-            const pixelData = imageData.data;
-            const textPixels = [];
-
-            for (let y = 0; y < gridHeight; y++) {
-                textPixels[y] = [];
-                for (let x = 0; x < gridWidth; x++) {
-                    const pixelIndex = (y * pixelSize * textCanvas.width + x * pixelSize) * 4;
-                    if (pixelData[pixelIndex + 3] > 0) {
-                        textPixels[y][x] = true;
-                    } else {
-                        textPixels[y][x] = false;
-                    }
-                }
-            }
-
-            function drawGrid() {
-                ctx.strokeStyle = "#ccc";
-                for (let x = 0; x < gridWidth; x++) {
-                    for (let y = 0; y < gridHeight; y++) {
-                        if (textPixels[y][x]) {
-                            ctx.strokeRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
-                        }
-                    }
-                }
-            }
-
-            canvas.addEventListener("click", (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-
-                const pixelX = Math.floor(x / (rect.width / gridWidth));
-                const pixelY = Math.floor(y / (rect.height / gridHeight));
-
-                if (textPixels[pixelY][pixelX]) {
-                    ctx.fillStyle = "red"; // or a color picker
-                    ctx.fillRect(pixelX * pixelSize, pixelY * pixelSize, pixelSize, pixelSize);
-                    ctx.strokeRect(pixelX * pixelSize, pixelY * pixelSize, pixelSize, pixelSize);
-                }
-            });
-
-            drawGrid();
+            new PixelBattle("pixel-canvas", "tomashevi.ch", 8, "bold 200px Lato");
         </script>
     </body>
 </html>
