@@ -243,9 +243,18 @@
                 font-size: 0.9rem;
                 line-height: 1;
             }
+
+            #pixel-battle-section {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
         </style>
     </head>
     <body>
+        <section id="pixel-battle-section">
+            <canvas id="pixel-canvas"></canvas>
+        </section>
         <div class="container">
             <header>
                 <nav class="nav-links" aria-label="Main navigation">
@@ -367,58 +376,46 @@
                     </div>
                 </section>
             </main>
-            <footer class="player-footer">
-                <div class="player-container">
-                    <a
-                        href="https://yandex.ru"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="player-button"
-                        aria-label="Previous"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="feather feather-rewind"
-                        >
-                            <polygon points="11 19 2 12 11 5 11 19"></polygon>
-                            <polygon points="22 19 13 12 22 5 22 19"></polygon>
-                        </svg>
-                    </a>
-                    <div class="player-text">https://tomashevi.ch</div>
-                    <a
-                        href="https://google.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="player-button"
-                        aria-label="Next"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="feather feather-fast-forward"
-                        >
-                            <polygon points="13 19 22 12 13 5 13 19"></polygon>
-                            <polygon points="2 19 11 12 2 5 2 19"></polygon>
-                        </svg>
-                    </a>
-                </div>
-            </footer>
         </div>
+        <footer class="player-footer">
+            <div class="player-container">
+                <a href="https://yandex.ru" target="_blank" rel="noopener noreferrer" class="player-button" aria-label="Previous">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="feather feather-rewind"
+                    >
+                        <polygon points="11 19 2 12 11 5 11 19"></polygon>
+                        <polygon points="22 19 13 12 22 5 22 19"></polygon>
+                    </svg>
+                </a>
+                <div class="player-text">https://tomashevi.ch</div>
+                <a href="https://google.com" target="_blank" rel="noopener noreferrer" class="player-button" aria-label="Next">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="feather feather-fast-forward"
+                    >
+                        <polygon points="13 19 22 12 13 5 13 19"></polygon>
+                        <polygon points="2 19 11 12 2 5 2 19"></polygon>
+                    </svg>
+                </a>
+            </div>
+        </footer>
         <script>
             const emailLink = document.getElementById("email-link-handler");
             emailLink.addEventListener("click", (e) => {
@@ -427,6 +424,76 @@
                 const domain = "tomashevi.ch";
                 window.location.href = `mailto:${user}@${domain}`;
             });
+
+            const canvas = document.getElementById("pixel-canvas");
+            const ctx = canvas.getContext("2d");
+            const pixelSize = 8;
+
+            const text = "tomashevi.ch";
+            const textCanvas = document.createElement("canvas");
+            const textCtx = textCanvas.getContext("2d");
+            textCtx.font = "bold 200px Lato";
+            const textMetrics = textCtx.measureText(text);
+
+            canvas.width = Math.ceil(textMetrics.width) + 2 * pixelSize;
+            canvas.height = 300;
+            canvas.style.width = canvas.width + "px";
+            canvas.style.height = canvas.height + "px";
+
+            textCanvas.width = canvas.width;
+            textCanvas.height = canvas.height;
+            textCtx.font = "bold 200px Lato";
+            textCtx.fillStyle = "#000";
+            textCtx.textAlign = "center";
+            textCtx.textBaseline = "middle";
+            textCtx.fillText(text, textCanvas.width / 2, textCanvas.height / 2);
+
+            const gridWidth = canvas.width / pixelSize;
+            const gridHeight = canvas.height / pixelSize;
+
+            const imageData = textCtx.getImageData(0, 0, textCanvas.width, textCanvas.height);
+            const pixelData = imageData.data;
+            const textPixels = [];
+
+            for (let y = 0; y < gridHeight; y++) {
+                textPixels[y] = [];
+                for (let x = 0; x < gridWidth; x++) {
+                    const pixelIndex = (y * pixelSize * textCanvas.width + x * pixelSize) * 4;
+                    if (pixelData[pixelIndex + 3] > 0) {
+                        textPixels[y][x] = true;
+                    } else {
+                        textPixels[y][x] = false;
+                    }
+                }
+            }
+
+            function drawGrid() {
+                ctx.strokeStyle = "#ccc";
+                for (let x = 0; x < gridWidth; x++) {
+                    for (let y = 0; y < gridHeight; y++) {
+                        if (textPixels[y][x]) {
+                            ctx.strokeRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+                        }
+                    }
+                }
+            }
+
+            canvas.addEventListener("click", (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const pixelX = Math.floor(x / (rect.width / gridWidth));
+                const pixelY = Math.floor(y / (rect.height / gridHeight));
+
+                if (textPixels[pixelY][pixelX]) {
+                    ctx.fillStyle = "red"; // or a color picker
+                    ctx.fillRect(pixelX * pixelSize, pixelY * pixelSize, pixelSize, pixelSize);
+                    ctx.strokeRect(pixelX * pixelSize, pixelY * pixelSize, pixelSize, pixelSize);
+                }
+            });
+
+            drawGrid();
         </script>
     </body>
 </html>
