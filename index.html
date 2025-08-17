@@ -1,3 +1,4 @@
+resizeObserver
 <!doctype html>
 <html lang="ru">
     <head>
@@ -401,23 +402,68 @@
             }
 
             class Fish {
-                constructor(ctx, fishData, palette, pixelSize, scale) {
+                constructor(ctx, fishData, palette, pixelSize, scale, canvasWidth) {
                     this.ctx = ctx;
                     this.fishData = fishData;
                     this.palette = palette;
                     this.pixelSize = pixelSize * scale;
+                    this.canvasWidth = canvasWidth;
+
+                    this.x = -this.getWidth() - Math.random() * 500;
+                    this.y = 0; // Will be set later
+                    this.speedX = Math.random() * 0.5 + 0.1;
+                    this.isVisible = true;
+
+                    // Create off-screen canvas for this fish
+                    this.offscreenCanvas = document.createElement("canvas");
+                    this.offscreenCanvas.width = this.getWidth();
+                    this.offscreenCanvas.height = this.getHeight();
+                    this.offscreenCtx = this.offscreenCanvas.getContext("2d");
+                    this.offscreenCtx.imageSmoothingEnabled = false;
+                    this.drawToOffscreenCanvas();
                 }
 
-                draw(x, y) {
+                drawToOffscreenCanvas() {
                     for (let r = 0; r < this.fishData.length; r++) {
                         for (let c = 0; c < this.fishData[r].length; c++) {
                             const colorIndex = this.fishData[r][c];
                             if (colorIndex) {
-                                this.ctx.fillStyle = this.palette[colorIndex];
-                                this.ctx.fillRect(x + c * this.pixelSize, y + r * this.pixelSize, this.pixelSize, this.pixelSize);
+                                this.offscreenCtx.fillStyle = this.palette[colorIndex];
+                                this.offscreenCtx.fillRect(
+                                    c * this.pixelSize,
+                                    r * this.pixelSize,
+                                    this.pixelSize,
+                                    this.pixelSize,
+                                );
                             }
                         }
                     }
+                }
+
+                update() {
+                    if (this.isVisible) {
+                        this.x += this.speedX;
+
+                        if (this.x > this.canvasWidth) {
+                            this.isVisible = false;
+                            setTimeout(
+                                () => {
+                                    this.x = -this.getWidth();
+                                    this.isVisible = true;
+                                },
+                                Math.random() * 2000 + 1000,
+                            );
+                        }
+                    }
+                }
+
+                draw() {
+                    if (!this.isVisible) return;
+                    this.ctx.drawImage(this.offscreenCanvas, this.x, this.y);
+                }
+
+                getWidth() {
+                    return this.fishData[0].length * this.pixelSize;
                 }
 
                 getHeight() {
@@ -675,52 +721,58 @@
                 const palette = generateProceduralPalette();
                 const scale = random.next() * 0.3 + 0.3;
 
-                const fish = new Fish(infiniteCtx, fishData, palette, 4, scale);
-                const x = random.next() * (infiniteCanvas.width - 30);
-                const y = random.next() * 20;
-
-                return { fish, x, y };
-            }
-
-            function layoutFish(fishes) {
-                infiniteCtx.clearRect(0, 0, infiniteCanvas.width, infiniteCanvas.height);
-                let totalHeight = 0;
-                fishes.forEach((fishInfo) => {
-                    totalHeight += fishInfo.fish.getHeight() + 5; // Add some padding
-                });
-                infiniteCanvas.height = totalHeight;
-
-                let currentY = 0;
-                fishes.forEach((fishInfo) => {
-                    fishInfo.fish.draw(fishInfo.x, currentY);
-                    currentY += fishInfo.fish.getHeight() + 5;
-                });
+                const fish = new Fish(infiniteCtx, fishData, palette, 4, scale, infiniteCanvas.width);
+                return fish;
             }
 
             const fishes = [];
+            let currentY = 0;
+
             function addMoreFish() {
+                const newFish = [];
                 for (let i = 0; i < 20; i++) {
                     const seed = generateRandomSeed();
-                    fishes.push(generateRandomFish(seed));
+                    const fish = generateRandomFish(seed);
+                    newFish.push(fish);
+                    fishes.push(fish);
                 }
-                layoutFish(fishes);
+
+                // Set y positions for new fish
+                newFish.forEach(fish => {
+                    fish.y = currentY;
+                    currentY += fish.getHeight() + 5;
+                });
+
+                infiniteCanvas.height = currentY;
             }
 
             addMoreFish();
             setInterval(addMoreFish, 10000);
 
+            function animateFish() {
+                infiniteCtx.clearRect(0, 0, infiniteCanvas.width, infiniteCanvas.height);
+
+                fishes.forEach(fish => {
+                    fish.update();
+                    fish.draw();
+                });
+
+                requestAnimationFrame(animateFish);
+            }
+
+            animateFish();
+
             const bubbleCanvas = document.getElementById("bubble-canvas");
             const bubbleCtx = bubbleCanvas.getContext("2d");
 
             // Resize bubble canvas to match fish canvas
-            const resizeObserver = new ResizeObserver(entries => {
+            const resizeObserver = new ResizeObserver((entries) => {
                 for (let entry of entries) {
                     bubbleCanvas.width = entry.target.width;
                     bubbleCanvas.height = entry.target.height;
                 }
             });
             resizeObserver.observe(infiniteCanvas);
-
 
             class Bubble {
                 constructor() {
@@ -737,7 +789,7 @@
                 draw() {
                     bubbleCtx.beginPath();
                     bubbleCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                    bubbleCtx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    bubbleCtx.fillStyle = "rgba(255, 255, 255, 0.7)";
                     bubbleCtx.fill();
                 }
             }
