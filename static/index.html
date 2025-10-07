@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>tomashevi.ch</title>
+        <title>tomashevich</title>
         <meta name="description" content="Personal website of tomashevich" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -288,7 +288,7 @@
                         <polygon points="22 19 13 12 22 5 22 19"></polygon>
                     </svg>
                 </a>
-                <div class="player-text">https://tomashevi.ch</div>
+                <div class="player-text">https://tomashevich</div>
                 <a href="https://google.com" target="_blank" rel="noopener noreferrer" class="player-button" aria-label="Next">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -475,11 +475,11 @@
             emailLink.addEventListener("click", (e) => {
                 e.preventDefault();
                 const user = "me";
-                const domain = "tomashevi.ch";
+                const domain = "tomashevich";
                 window.location.href = `mailto:${user}@${domain}`;
             });
 
-            new PixelBattle("pixel-canvas", "tomashevi.ch", "bold 200px Lato");
+            new PixelBattle("pixel-canvas", "tomashevich", "bold 200px Lato");
 
             const infiniteCanvas = document.getElementById("infinite-canvas");
             const infiniteCtx = infiniteCanvas.getContext("2d");
@@ -738,7 +738,7 @@
                 }
 
                 // Set y positions for new fish
-                newFish.forEach(fish => {
+                newFish.forEach((fish) => {
                     fish.y = currentY;
                     currentY += fish.getHeight() + 5;
                 });
@@ -752,7 +752,7 @@
             function animateFish() {
                 infiniteCtx.clearRect(0, 0, infiniteCanvas.width, infiniteCanvas.height);
 
-                fishes.forEach(fish => {
+                fishes.forEach((fish) => {
                     fish.update();
                     fish.draw();
                 });
