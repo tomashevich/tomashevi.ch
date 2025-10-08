@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"tomashevich/server"
+	"tomashevich/server/database"
 )
 
 //go:embed static/*
@@ -13,7 +14,11 @@ import (
 var staticFiles embed.FS
 
 func main() {
-	server := server.NewServer(":8037", staticFiles)
+	db, err := database.NewDatabase("storage.db")
+	if err != nil {
+		log.Fatalf("cant init storage with err %s", err.Error())
+	}
+	s := server.NewServer(":8037", staticFiles, db)
 
-	log.Fatal(server.Run())
+	log.Fatal(s.Run())
 }

@@ -6,17 +6,20 @@ import (
 	"log"
 	"net/http"
 
+	"tomashevich/server/database"
 	"tomashevich/server/handlers/api"
 )
 
 type Server struct {
 	addr        string
+	database    *database.Database
 	staticFiles embed.FS
 }
 
-func NewServer(addr string, staticFiles embed.FS) *Server {
+func NewServer(addr string, staticFiles embed.FS, database *database.Database) *Server {
 	return &Server{
 		addr,
+		database,
 		staticFiles,
 	}
 }
