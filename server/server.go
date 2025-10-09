@@ -1,7 +1,6 @@
 package server
 
 import (
-	"embed"
 	"io/fs"
 	"log"
 	"net/http"
@@ -13,10 +12,10 @@ import (
 type Server struct {
 	addr        string
 	database    *database.Database
-	staticFiles embed.FS
+	staticFiles fs.FS
 }
 
-func NewServer(addr string, staticFiles embed.FS, database *database.Database) *Server {
+func NewServer(addr string, staticFiles fs.FS, database *database.Database) *Server {
 	return &Server{
 		addr,
 		database,
@@ -32,13 +31,8 @@ func (s Server) Run() error {
 		Handler: router,
 	}
 
-	staticFS, err := fs.Sub(s.staticFiles, "static")
-	if err != nil {
-		return err
-	}
-
 	// Register static files
-	router.Handle("/", http.FileServerFS(staticFS))
+	router.Handle("/", http.FileServerFS(s.staticFiles))
 
 	// Register API handlers
 	api.RegisterFishes(router)
