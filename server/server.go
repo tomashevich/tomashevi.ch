@@ -7,6 +7,7 @@ import (
 
 	"tomashevich/server/database"
 	"tomashevich/server/handler"
+	"tomashevich/server/middleware"
 )
 
 type Server struct {
@@ -26,9 +27,13 @@ func NewServer(addr string, staticFiles fs.FS, database *database.Database) *Ser
 func (s Server) Run() error {
 	router := http.NewServeMux()
 
+	stack := middleware.MiddlewareStack(
+		middleware.Fisher(s.database),
+	)
+
 	server := http.Server{
 		Addr:    s.addr,
-		Handler: router,
+		Handler: stack(router),
 	}
 
 	// Register static files
