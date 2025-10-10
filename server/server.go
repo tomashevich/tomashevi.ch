@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"tomashevich/server/database"
-	"tomashevich/server/handlers"
+	"tomashevich/server/handler"
 )
 
 type Server struct {
@@ -34,8 +34,8 @@ func (s Server) Run() error {
 	// Register static files
 	router.Handle("/", http.FileServerFS(s.staticFiles))
 
-	// Register API handlers
-	handlers.RegisterFishes(router)
+	// Register API handler
+	handler.RegisterFishes(router)
 
 	log.Printf("starting server at %s", s.addr)
 
