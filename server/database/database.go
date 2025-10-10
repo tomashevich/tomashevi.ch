@@ -22,7 +22,7 @@ func NewDatabase(database string) (*Database, error) {
 
 	// create tables
 	tables := []string{
-		"CREATE TABLE IF NOT EXISTS fishes (seed VARCHAR(30), address VARCHAR(39), spawned_at DATETIME DEFAULT current_timestamp)",
+		"CREATE TABLE IF NOT EXISTS fishes (seed VARCHAR(32), address VARCHAR(39) UNIQUE PRIMARY KEY)",
 	}
 	tx, err := db.Begin()
 	if err != nil {
