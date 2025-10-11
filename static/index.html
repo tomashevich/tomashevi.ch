@@ -512,6 +512,9 @@
                     this.isLoading = true;
                     try {
                         const response = await fetch(`/fishes?page=${this.currentPage}`);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
                         const data = await response.json();
                         this.seedBuffer.push(...data.map(item => item.seed));
                         if (data.length < 100) {
@@ -521,9 +524,13 @@
                         }
                     } catch (error) {
                         console.error("Error loading fish seeds:", error);
-                    } finally {
-                        this.isLoading = false;
+                        setTimeout(() => {
+                            this.isLoading = false;
+                            this.fillSeedBuffer();
+                        }, 5000);
+                        return; // Return here to avoid setting isLoading to false immediately
                     }
+                    this.isLoading = false;
                 }
 
                 addFish() {
