@@ -429,19 +429,22 @@
             }
 
             class Fish {
-                constructor(ctx, fishData, palette, pixelSize, scale, canvasWidth) {
+                constructor(ctx, canvasWidth) {
                     this.ctx = ctx;
+                    this.canvasWidth = canvasWidth;
+                    this.isOffscreen = true;
+                }
+
+                respawn(seed) {
+                    const { fishData, palette, scale } = generateRandomFish(seed);
                     this.fishData = fishData;
                     this.palette = palette;
-                    this.pixelSize = pixelSize * scale;
-                    this.canvasWidth = canvasWidth;
-
+                    this.pixelSize = 4 * scale;
                     this.x = -this.getWidth() - Math.random() * 500;
-                    this.y = 0; // Will be set later
+                    this.y = Math.random() * infiniteCanvas.height;
                     this.speedX = Math.random() * 0.5 + 0.1;
                     this.isOffscreen = false;
 
-                    // Create off-screen canvas for this fish
                     this.offscreenCanvas = document.createElement("canvas");
                     this.offscreenCanvas.width = this.getWidth();
                     this.offscreenCanvas.height = this.getHeight();
@@ -468,14 +471,15 @@
                 }
 
                 update() {
+                    if (this.isOffscreen) return;
                     this.x += this.speedX;
-
                     if (this.x > this.canvasWidth) {
                         this.isOffscreen = true;
                     }
                 }
 
                 draw() {
+                    if (this.isOffscreen) return;
                     this.ctx.drawImage(this.offscreenCanvas, this.x, this.y);
                 }
 
@@ -485,6 +489,76 @@
 
                 getHeight() {
                     return this.fishData.length * this.pixelSize;
+                }
+            }
+
+            class FishManager {
+                constructor(ctx, canvasWidth) {
+                    this.ctx = ctx;
+                    this.canvasWidth = canvasWidth;
+                    this.fishes = [];
+                    this.seedBuffer = [];
+                    this.currentPage = 1;
+                    this.isLoading = false;
+                    this.TARGET_FISH_COUNT = 50;
+                    this.BUFFER_REFILL_THRESHOLD = 10;
+                    this.ADD_FISH_INTERVAL = 1000; // Add a new fish every second
+                }
+
+                async fillSeedBuffer() {
+                    if (this.isLoading || this.seedBuffer.length > this.BUFFER_REFILL_THRESHOLD) {
+                        return;
+                    }
+                    this.isLoading = true;
+                    try {
+                        const response = await fetch(`/fishes?page=${this.currentPage}`);
+                        const data = await response.json();
+                        this.seedBuffer.push(...data.map(item => item.seed));
+                        if (data.length < 100) {
+                            this.currentPage = 1;
+                        } else {
+                            this.currentPage++;
+                        }
+                    } catch (error) {
+                        console.error("Error loading fish seeds:", error);
+                    } finally {
+                        this.isLoading = false;
+                    }
+                }
+
+                addFish() {
+                    if (this.fishes.length >= this.TARGET_FISH_COUNT) {
+                        return;
+                    }
+                    const seed = this.seedBuffer.shift();
+                    if (seed) {
+                        const fish = new Fish(this.ctx, this.canvasWidth);
+                        fish.respawn(seed);
+                        this.fishes.push(fish);
+                    }
+                    this.fillSeedBuffer();
+                }
+
+                start() {
+                    this.fillSeedBuffer();
+                    setInterval(() => this.addFish(), this.ADD_FISH_INTERVAL);
+                    this.animate();
+                }
+
+                animate() {
+                    this.ctx.clearRect(0, 0, this.canvasWidth, infiniteCanvas.height);
+                    this.fishes.forEach(fish => {
+                        fish.update();
+                        fish.draw();
+                        if (fish.isOffscreen) {
+                            const seed = this.seedBuffer.shift();
+                            if (seed) {
+                                fish.respawn(seed);
+                            }
+                            this.fillSeedBuffer();
+                        }
+                    });
+                    requestAnimationFrame(() => this.animate());
                 }
             }
 
@@ -747,63 +821,11 @@
                 const palette = generateProceduralPalette();
                 const scale = random.next() * 0.3 + 0.3;
 
-                const fish = new Fish(infiniteCtx, fishData, palette, 4, scale, infiniteCanvas.width);
-                return fish;
+                return { fishData, palette, scale };
             }
 
-            const fishes = [];
-            let currentPage = 1;
-            let initialFishCount = 0;
-            let isLoading = false;
-
-            async function loadFishes(page = 1) {
-                if (isLoading) return;
-                isLoading = true;
-                try {
-                    const response = await fetch(`/fishes?page=${page}`);
-                    const data = await response.json();
-                    if (page === 1) {
-                        initialFishCount = data.length;
-                    }
-                    data.forEach(fishData => {
-                        const fish = generateRandomFish(fishData.seed);
-                        fish.y = Math.random() * infiniteCanvas.height;
-                        fishes.push(fish);
-                    });
-                    if (data.length < 100) {
-                        currentPage = 1;
-                    } else {
-                        currentPage++;
-                    }
-                } catch (error) {
-                    console.error("Error loading fishes:", error);
-                } finally {
-                    isLoading = false;
-                }
-            }
-
-            loadFishes(currentPage);
-
-            function animateFish() {
-                infiniteCtx.clearRect(0, 0, infiniteCanvas.width, infiniteCanvas.height);
-
-                for (let i = fishes.length - 1; i >= 0; i--) {
-                    const fish = fishes[i];
-                    fish.update();
-                    fish.draw();
-                    if (fish.isOffscreen) {
-                        fishes.splice(i, 1);
-                    }
-                }
-
-                if (fishes.length < initialFishCount / 2) {
-                    loadFishes(currentPage);
-                }
-
-                requestAnimationFrame(animateFish);
-            }
-
-            animateFish();
+            const fishManager = new FishManager(infiniteCtx, infiniteCanvas.width);
+            fishManager.start();
 
             class Bubble {
                 constructor() {
