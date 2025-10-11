@@ -18,17 +18,9 @@ func listFishes(m *http.ServeMux, db *database.Database) {
 		w.Header().Set("Content-Type", "application/json")
 
 		pageQuery := r.URL.Query().Get("page")
-		if pageQuery == "" {
-			pageQuery = "1"
-		}
-
-		page, err := strconv.ParseInt(pageQuery, 10, 32)
-		if err != nil {
-			http.Error(w, "Page param must be int", http.StatusUnprocessableEntity)
-			return
-		}
+		page, _ := strconv.ParseInt(pageQuery, 10, 32)
 		if page <= 0 {
-			http.Error(w, "Page param must be positive", http.StatusUnprocessableEntity)
+			http.Error(w, "Page param must be uint", http.StatusUnprocessableEntity)
 			return
 		}
 		page -= 1
@@ -37,6 +29,10 @@ func listFishes(m *http.ServeMux, db *database.Database) {
 		if err != nil {
 			http.Error(w, "Failed to get fishes", http.StatusInternalServerError)
 			return
+		}
+
+		if len(fishes) == 0 {
+			fishes = make([]database.Fish, 0)
 		}
 
 		json.NewEncoder(w).Encode(fishes)
