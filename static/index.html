@@ -439,7 +439,7 @@
                     this.x = -this.getWidth() - Math.random() * 500;
                     this.y = 0; // Will be set later
                     this.speedX = Math.random() * 0.5 + 0.1;
-                    this.isVisible = true;
+                    this.isOffscreen = false;
 
                     // Create off-screen canvas for this fish
                     this.offscreenCanvas = document.createElement("canvas");
@@ -468,25 +468,14 @@
                 }
 
                 update() {
-                    if (this.isVisible) {
-                        this.x += this.speedX;
+                    this.x += this.speedX;
 
-                        if (this.x > this.canvasWidth) {
-                            this.isVisible = false;
-                            setTimeout(
-                                () => {
-                                    this.x = -this.getWidth();
-                                    this.y = Math.random() * infiniteCanvas.height;
-                                    this.isVisible = true;
-                                },
-                                Math.random() * 2000 + 1000,
-                            );
-                        }
+                    if (this.x > this.canvasWidth) {
+                        this.isOffscreen = true;
                     }
                 }
 
                 draw() {
-                    if (!this.isVisible) return;
                     this.ctx.drawImage(this.offscreenCanvas, this.x, this.y);
                 }
 
@@ -525,10 +514,6 @@
 
             window.addEventListener("resize", resizeCanvas);
             resizeCanvas();
-
-            function generateRandomSeed() {
-                return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-            }
 
             function generateRandomFish(seed) {
                 class SeededRandom {
@@ -767,25 +752,53 @@
             }
 
             const fishes = [];
+            let currentPage = 1;
+            let initialFishCount = 0;
+            let isLoading = false;
 
-            function addMoreFish(count) {
-                for (let i = 0; i < count; i++) {
-                    const seed = generateRandomSeed();
-                    const fish = generateRandomFish(seed);
-                    fish.y = Math.random() * infiniteCanvas.height;
-                    fishes.push(fish);
+            async function loadFishes(page = 1) {
+                if (isLoading) return;
+                isLoading = true;
+                try {
+                    const response = await fetch(`/fishes?page=${page}`);
+                    const data = await response.json();
+                    if (page === 1) {
+                        initialFishCount = data.length;
+                    }
+                    data.forEach(fishData => {
+                        const fish = generateRandomFish(fishData.seed);
+                        fish.y = Math.random() * infiniteCanvas.height;
+                        fishes.push(fish);
+                    });
+                    if (data.length < 100) {
+                        currentPage = 1;
+                    } else {
+                        currentPage++;
+                    }
+                } catch (error) {
+                    console.error("Error loading fishes:", error);
+                } finally {
+                    isLoading = false;
                 }
             }
 
-            addMoreFish(20);
+            loadFishes(currentPage);
 
             function animateFish() {
                 infiniteCtx.clearRect(0, 0, infiniteCanvas.width, infiniteCanvas.height);
 
-                fishes.forEach((fish) => {
+                for (let i = fishes.length - 1; i >= 0; i--) {
+                    const fish = fishes[i];
                     fish.update();
                     fish.draw();
-                });
+                    if (fish.isOffscreen) {
+                        fishes.splice(i, 1);
+                    }
+                }
+
+                if (fishes.length < initialFishCount / 2) {
+                    loadFishes(currentPage);
+                }
 
                 requestAnimationFrame(animateFish);
             }

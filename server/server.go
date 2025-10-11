@@ -40,7 +40,7 @@ func (s Server) Run() error {
 	router.Handle("/", http.FileServerFS(s.staticFiles))
 
 	// Register API handler
-	handler.RegisterFishes(router)
+	handler.RegisterFishes(router, s.database)
 
 	log.Printf("starting server at %s", s.addr)
 
