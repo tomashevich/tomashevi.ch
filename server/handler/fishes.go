@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 	"tomashevich/server/database"
 )
 
 func RegisterFishes(m *http.ServeMux, db *database.Database) {
 	listFishes(m, db)
-	getFish(m)
+	getFish(m, db)
 }
 
 func listFishes(m *http.ServeMux, db *database.Database) {
@@ -42,8 +43,16 @@ func listFishes(m *http.ServeMux, db *database.Database) {
 	})
 }
 
-func getFish(m *http.ServeMux) {
-	m.HandleFunc("GET /fishes/{id}", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("fish with id " + r.PathValue("id")))
+func getFish(m *http.ServeMux, db *database.Database) {
+	m.HandleFunc("GET /fishes/me", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+
+		fish, err := db.GetFishByIP(r.Context(), strings.Split(r.RemoteAddr, ":")[0])
+		if err != nil {
+			http.Error(w, "Cant find your soul in fishes", http.StatusInternalServerError)
+			return
+		}
+
+		json.NewEncoder(w).Encode(fish)
 	})
 }
