@@ -25,17 +25,17 @@ func listFishes(m *http.ServeMux, db *database.Database) {
 		}
 		page -= 1
 
-		fishes, err := db.GetFishes(r.Context(), 100, page*100)
+		seeds, err := db.GetSeeds(r.Context(), 100, page*100)
 		if err != nil {
 			http.Error(w, "Failed to get fishes", http.StatusInternalServerError)
 			return
 		}
 
-		if len(fishes) == 0 {
-			fishes = make([]database.Fish, 0)
+		if len(seeds) == 0 {
+			seeds = make([]string, 0)
 		}
 
-		json.NewEncoder(w).Encode(fishes)
+		json.NewEncoder(w).Encode(seeds)
 	})
 }
 
@@ -43,12 +43,12 @@ func getFish(m *http.ServeMux, db *database.Database) {
 	m.HandleFunc("GET /fishes/me", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		fish, err := db.GetFishByIP(r.Context(), strings.Split(r.RemoteAddr, ":")[0])
+		seed, err := db.GetSeedByIP(r.Context(), strings.Split(r.RemoteAddr, ":")[0])
 		if err != nil {
 			http.Error(w, "Cant find your soul in fishes", http.StatusInternalServerError)
 			return
 		}
 
-		json.NewEncoder(w).Encode(fish)
+		json.NewEncoder(w).Encode(seed)
 	})
 }

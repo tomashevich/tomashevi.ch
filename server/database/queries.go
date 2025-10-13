@@ -2,52 +2,52 @@ package database
 
 import "context"
 
-func (d Database) AddFish(ctx context.Context, seed, address string) error {
-	if _, err := d.db.Exec("INSERT INTO fishes (seed, address) VALUES (?, ?)", seed, address); err != nil {
+func (d Database) GiveSoulToHel(ctx context.Context, seed, address string) error {
+	if _, err := d.db.Exec("INSERT INTO souls (seed, address) VALUES (?, ?)", seed, address); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (d Database) GetFishByIP(ctx context.Context, address string) (Fish, error) {
-	row := d.db.QueryRow("SELECT * FROM fishes WHERE address=?", address)
-	var fish Fish
+func (d Database) GetSeedByIP(ctx context.Context, address string) (string, error) {
+	row := d.db.QueryRow("SELECT seed FROM souls WHERE address=?", address)
+	var seed string
 
 	if row.Err() != nil {
-		return fish, row.Err()
+		return seed, row.Err()
 	}
 
-	if err := row.Scan(&fish.Seed, &fish.Address); err != nil {
-		return fish, err
+	if err := row.Scan(&seed); err != nil {
+		return seed, err
 	}
 
-	return fish, nil
+	return seed, nil
 }
 
-func (d Database) GetFishes(ctx context.Context, limit, offset int64) ([]Fish, error) {
-	rows, err := d.db.Query("SELECT * FROM fishes ORDER BY seed DESC LIMIT ? OFFSET ?", limit, offset)
-	var fishes []Fish
+func (d Database) GetSeeds(ctx context.Context, limit, offset int64) ([]string, error) {
+	rows, err := d.db.Query("SELECT seed FROM souls ORDER BY seed DESC LIMIT ? OFFSET ?", limit, offset)
+	var seeds []string
 
 	if err != nil {
-		return fishes, err
+		return seeds, err
 	}
 
 	defer rows.Close()
 
 	for rows.Next() {
-		var fish Fish
-		if err := rows.Scan(&fish.Seed, &fish.Address); err != nil {
+		var seed string
+		if err := rows.Scan(&seed); err != nil {
 			return nil, err
 		}
-		fishes = append(fishes, fish)
+		seeds = append(seeds, seed)
 	}
 
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return fishes, nil
+	return seeds, nil
 }
 
 func (d Database) GetPixels(ctx context.Context) ([]Pixel, error) {

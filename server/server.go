@@ -28,7 +28,7 @@ func (s Server) Run() error {
 	router := http.NewServeMux()
 
 	stack := middleware.MiddlewareStack(
-		middleware.Fisher(s.database),
+		middleware.Helheim(s.database),
 	)
 
 	server := http.Server{

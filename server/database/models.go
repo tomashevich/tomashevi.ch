@@ -1,13 +1,9 @@
 package database
 
-type Fish struct {
-	Seed    string `json:"seed"`
-	Address string `json:"-"` // TODO: SOUL REFERENCE
-}
-
 type Soul struct {
 	Id            int    `json:"id"`
 	Address       string `json:"-"`
+	Seed          string `json:"seed"`
 	PaintedPixels int    `json:"painted_pixels"`
 }
 
