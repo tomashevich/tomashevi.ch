@@ -215,6 +215,30 @@ main {
     height: 100%;
     pointer-events: none;
 }
+
+.color-picker {
+    position: fixed;
+    transform: translate(-50%, -50%);
+    width: 1px;
+    height: 1px;
+}
+
+.color-option {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    margin-left: -10px;
+    margin-top: -10px;
+    border-radius: 50%;
+    border: 2px solid white;
+    cursor: pointer;
+    transition: transform 0.1s ease-out;
+}
+
+.color-option:hover {
+    transform: scale(1.2);
+}
+
 @media (max-width: 768px) {
     #pixel-battle-section {
         display: none;

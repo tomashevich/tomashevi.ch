@@ -9,6 +9,8 @@ class PixelBattle {
     this.text = text;
     this.pixelSize = 8;
     this.font = font;
+    this.color = "red";
+    this.colorPicker = null;
 
     this.init();
   }
@@ -17,7 +19,30 @@ class PixelBattle {
     this.setupCanvas();
     this.createTextGrid();
     this.drawGrid();
+    this.loadPixels();
     this.addEventListeners();
+  }
+
+  loadPixels() {
+    fetch("/pixels")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to load pixels");
+        }
+        return response.json();
+      })
+      .then((pixels) => {
+        pixels.forEach((pixel) => {
+          if (this.textPixels[pixel.y] && this.textPixels[pixel.y][pixel.x]) {
+            this.ctx.fillStyle = pixel.color;
+            this.ctx.fillRect(pixel.x * this.pixelSize, pixel.y * this.pixelSize, this.pixelSize, this.pixelSize);
+            this.ctx.strokeRect(pixel.x * this.pixelSize, pixel.y * this.pixelSize, this.pixelSize, this.pixelSize);
+          }
+        });
+      })
+      .catch((error) => {
+        console.error("Error loading pixels:", error);
+      });
   }
 
   setupCanvas() {
@@ -84,16 +109,99 @@ class PixelBattle {
       const pixelX = Math.floor(x / (rect.width / gridWidth));
       const pixelY = Math.floor(y / (rect.height / this.textPixels.length));
 
-      if (!this.textPixels[pixelY]) {
+      if (!this.textPixels[pixelY] || !this.textPixels[pixelY][pixelX]) {
         return;
       }
-      if (!this.textPixels[pixelY][pixelX]) {
-        return;
-      }
-      this.ctx.fillStyle = "red"; // or a color picker
-      this.ctx.fillRect(pixelX * this.pixelSize, pixelY * this.pixelSize, this.pixelSize, this.pixelSize);
-      this.ctx.strokeRect(pixelX * this.pixelSize, pixelY * this.pixelSize, this.pixelSize, this.pixelSize);
+
+      const color = this.color;
+
+      fetch("/pixels:paint", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          x: pixelX,
+          y: pixelY,
+          color: color,
+        }),
+      })
+        .then((response) => {
+          if (response.ok) {
+            this.ctx.fillStyle = color;
+            this.ctx.fillRect(pixelX * this.pixelSize, pixelY * this.pixelSize, this.pixelSize, this.pixelSize);
+            this.ctx.strokeRect(pixelX * this.pixelSize, pixelY * this.pixelSize, this.pixelSize, this.pixelSize);
+          } else {
+            console.error("Failed to paint pixel");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
     });
+
+    this.canvas.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      this.showColorPicker(e.clientX, e.clientY);
+    });
+  }
+
+  showColorPicker(x, y) {
+    this.hideColorPicker(); // Hide any existing color picker
+
+    const colorPicker = document.createElement("div");
+    colorPicker.className = "color-picker";
+    document.body.appendChild(colorPicker);
+    this.colorPicker = colorPicker;
+
+    const colors = ["red", "green", "blue", "yellow", "purple", "orange", "black", "white"];
+    const radius = 50; // Radius of the circle
+    const angleStep = (2 * Math.PI) / colors.length;
+
+    colors.forEach((color, index) => {
+      const colorOption = document.createElement("div");
+      colorOption.className = "color-option";
+      colorOption.style.backgroundColor = color;
+
+      const angle = index * angleStep;
+      const optionX = radius * Math.cos(angle);
+      const optionY = radius * Math.sin(angle);
+
+      colorOption.style.transform = `translate(${optionX}px, ${optionY}px)`;
+
+      colorOption.addEventListener("click", () => {
+        this.selectColor(color);
+      });
+
+      colorPicker.appendChild(colorOption);
+    });
+
+    colorPicker.style.left = `${x}px`;
+    colorPicker.style.top = `${y}px`;
+
+    // Add a listener to close the color picker when clicking outside
+    setTimeout(() => {
+        document.addEventListener("click", this.handleOutsideClick.bind(this));
+    }, 0);
+  }
+
+  handleOutsideClick(e) {
+      if (this.colorPicker && !this.colorPicker.contains(e.target)) {
+          this.hideColorPicker();
+      }
+  }
+
+  hideColorPicker() {
+    if (this.colorPicker) {
+      this.colorPicker.remove();
+      this.colorPicker = null;
+      document.removeEventListener("click", this.handleOutsideClick.bind(this));
+    }
+  }
+
+  selectColor(color) {
+    this.color = color;
+    this.hideColorPicker();
   }
 }
 

@@ -41,6 +41,7 @@ func (s Server) Run() error {
 
 	// Register API handler
 	handler.RegisterFishes(router, s.database)
+	handler.RegisterPixels(router, s.database)
 
 	log.Printf("starting server at %s", s.addr)
 
