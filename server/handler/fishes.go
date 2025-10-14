@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"strings"
 	"tomashevich/server/database"
+	"tomashevich/server/middleware"
 )
 
 func RegisterFishes(m *http.ServeMux, db *database.Database) {
@@ -43,7 +43,13 @@ func getFish(m *http.ServeMux, db *database.Database) {
 	m.HandleFunc("GET /fishes/me", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		seed, err := db.GetSeedByIP(r.Context(), strings.Split(r.RemoteAddr, ":")[0])
+		id := middleware.GetSoulID(r.Context())
+		if id == 0 {
+			http.Error(w, "cant get your soul", http.StatusInternalServerError)
+			return
+		}
+
+		seed, err := db.GetSeed(r.Context(), id)
 		if err != nil {
 			http.Error(w, "Cant find your soul in fishes", http.StatusInternalServerError)
 			return

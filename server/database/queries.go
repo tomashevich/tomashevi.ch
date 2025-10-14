@@ -10,8 +10,8 @@ func (d Database) GiveSoulToHel(ctx context.Context, seed, address string) error
 	return nil
 }
 
-func (d Database) GetSeedByIP(ctx context.Context, address string) (string, error) {
-	row := d.db.QueryRow("SELECT seed FROM souls WHERE address=?", address)
+func (d Database) GetSeed(ctx context.Context, id int) (string, error) {
+	row := d.db.QueryRow("SELECT seed FROM souls WHERE id=?", id)
 	var seed string
 
 	if row.Err() != nil {
