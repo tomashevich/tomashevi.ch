@@ -181,14 +181,14 @@ class PixelBattle {
 
     // Add a listener to close the color picker when clicking outside
     setTimeout(() => {
-        document.addEventListener("click", this.handleOutsideClick.bind(this));
+      document.addEventListener("click", this.handleOutsideClick.bind(this));
     }, 0);
   }
 
   handleOutsideClick(e) {
-      if (this.colorPicker && !this.colorPicker.contains(e.target)) {
-          this.hideColorPicker();
-      }
+    if (this.colorPicker && !this.colorPicker.contains(e.target)) {
+      this.hideColorPicker();
+    }
   }
 
   hideColorPicker() {
@@ -288,7 +288,7 @@ class FishManager {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      this.seedBuffer.push(...data.map((item) => item.seed));
+      this.seedBuffer.push(...data);
       if (data.length < 100) {
         this.currentPage = 1;
       } else {
