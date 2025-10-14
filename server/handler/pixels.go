@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"tomashevich/server/database"
+	"tomashevich/server/middleware"
 )
 
 func RegisterPixels(m *http.ServeMux, db *database.Database) {
@@ -39,6 +40,12 @@ func paintPixel(m *http.ServeMux, db *database.Database) {
 	m.HandleFunc("PATCH /pixels:paint", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
+		id := middleware.GetSoulID(r.Context())
+		if id == 0 {
+			http.Error(w, "cant get your soul", http.StatusInternalServerError)
+			return
+		}
+
 		var data paintPixelData
 		err := json.NewDecoder(r.Body).Decode(&data)
 		if err != nil {
@@ -68,7 +75,7 @@ func paintPixel(m *http.ServeMux, db *database.Database) {
 			return
 		}
 
-		if err := db.PaintPixel(r.Context(), 0, data.X, data.Y, data.Color); err != nil {
+		if err := db.PaintPixel(r.Context(), id, data.X, data.Y, data.Color); err != nil {
 			http.Error(w, "cant paint this pixel", http.StatusInternalServerError)
 			return
 		}

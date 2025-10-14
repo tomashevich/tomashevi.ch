@@ -25,6 +25,21 @@ func (d Database) GetSeedByIP(ctx context.Context, address string) (string, erro
 	return seed, nil
 }
 
+func (d Database) GetSoulIDByIP(ctx context.Context, address string) (int, error) {
+	row := d.db.QueryRow("SELECT id FROM souls WHERE address=?", address)
+	var id int
+
+	if row.Err() != nil {
+		return id, row.Err()
+	}
+
+	if err := row.Scan(&id); err != nil {
+		return id, err
+	}
+
+	return id, nil
+}
+
 func (d Database) GetSeeds(ctx context.Context, limit, offset int64) ([]string, error) {
 	rows, err := d.db.Query("SELECT seed FROM souls ORDER BY seed DESC LIMIT ? OFFSET ?", limit, offset)
 	var seeds []string
