@@ -341,13 +341,45 @@ class FishManager {
   }
 }
 
-const emailLink = document.getElementById("email-link-handler");
-emailLink.addEventListener("click", (e) => {
-  e.preventDefault();
-  const user = "me";
-  const domain = "tomashevich";
-  window.location.href = `mailto:${user}@${domain}`;
+
+
+const contentContainer = document.getElementById("content-container");
+const navLinks = document.querySelectorAll(".nav-link");
+
+async function loadContent(page) {
+    try {
+        const response = await fetch(`pages/${page}.html`);
+        if (!response.ok) {
+            throw new Error(`Failed to load page: ${page}`);
+        }
+        const content = await response.text();
+        contentContainer.innerHTML = content;
+
+        if (page === 'home') {
+            const emailLink = document.getElementById("email-link-handler");
+            emailLink.addEventListener("click", (e) => {
+                e.preventDefault();
+                const user = "me";
+                const domain = "tomashevich";
+                window.location.href = `mailto:${user}@${domain}`;
+            });
+        }
+    } catch (error) {
+        console.error("Error loading content:", error);
+        contentContainer.innerHTML = "<p>Error loading content.</p>";
+    }
+}
+
+navLinks.forEach(link => {
+    link.addEventListener("click", (e) => {
+        e.preventDefault();
+        const page = link.getAttribute("href").substring(1) || "home";
+        loadContent(page);
+    });
 });
+
+// Load home page by default
+loadContent("home");
 
 new PixelBattle("pixel-canvas", "tomashevich", "bold 200px Lato");
 

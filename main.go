@@ -11,7 +11,6 @@ import (
 )
 
 //go:embed static/*
-//go:embed static/icons/*.svg
 var staticFiles embed.FS
 
 func main() {
