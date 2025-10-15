@@ -116,7 +116,7 @@ class PixelBattle {
       const color = this.color;
 
       fetch("/pixels:paint", {
-        method: "PATCH",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },

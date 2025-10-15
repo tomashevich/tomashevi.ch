@@ -37,7 +37,7 @@ type paintPixelData struct {
 }
 
 func paintPixel(m *http.ServeMux, db *database.Database) {
-	m.HandleFunc("PATCH /pixels:paint", func(w http.ResponseWriter, r *http.Request) {
+	m.HandleFunc("POST /pixels:paint", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		id := middleware.GetSoulID(r.Context())
