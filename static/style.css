@@ -75,22 +75,35 @@ main {
     flex-grow: 1;
 }
 
+header {
+    display: flex;
+    justify-content: flex-start; /* ALIGNED LEFT */
+    margin-bottom: 1rem;
+}
+
 /* Components */
 .nav-links {
     display: flex;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .nav-link {
-    color: var(--secondary);
+    background-color: #fff;
+    color: var(--default);
+    font-weight: 900;
     padding: 0.5rem 1rem;
     border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s ease-in-out;
 }
 
 .nav-link:hover {
     color: var(--background);
     background-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
+
 
 .social-links {
     display: grid;
@@ -99,12 +112,12 @@ main {
 }
 
 .social-link {
+    background-color: #fff;
+    color: var(--default);
     padding: 1rem;
-    border: 1px solid var(--default);
     border-radius: 8px;
-    transition:
-        background-color 0.3s,
-        border-color 0.3s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s ease-in-out;
     display: flex;
     align-items: center;
     text-decoration: none;
@@ -115,17 +128,22 @@ main {
     width: 32px;
     height: 32px;
     transition: filter 0.3s;
+    flex-shrink: 0; /* Prevent icon from shrinking */
 }
 
 .social-link span {
     font-size: 1rem;
     color: var(--default);
     transition: color 0.3s;
+    min-width: 0; /* Allow text container to shrink */
+    overflow-wrap: break-word; /* Allow long text to wrap */
 }
 
 .social-link:hover {
+    color: var(--background);
     background-color: var(--primary);
-    border-color: var(--secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .social-link:hover img {
@@ -248,19 +266,25 @@ main {
 }
 
 .fish-card {
+    background-color: #fff;
+    color: var(--default);
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 1rem;
     padding: 0.5rem;
-    background-color: #fff;
-    border: 1px solid var(--default);
     border-radius: 8px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s ease-in-out;
+}
+
+.fish-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .fish-card.is-user-fish {
-    border-color: var(--primary);
+    border: 1px solid var(--primary); /* Keep border for user fish */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     order: -1; /* Always show user fish first */
 }
