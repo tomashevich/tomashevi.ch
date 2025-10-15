@@ -239,6 +239,108 @@ main {
     transform: scale(1.2);
 }
 
+/* Glossary Page */
+.glossary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* Tighter spacing */
+    margin-bottom: 1.5rem; /* Add margin at the bottom */
+}
+
+.fish-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem;
+    background-color: #fff;
+    border: 1px solid var(--default);
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.fish-card.is-user-fish {
+    border-color: var(--primary);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    order: -1; /* Always show user fish first */
+}
+
+#user-fish-container .fish-card {
+    margin-bottom: 0.5rem; /* Spacing between user fish and the main list */
+}
+
+
+.fish-card-info {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.fish-card-info h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.9rem;
+    color: var(--primary);
+}
+
+.fish-card-info time {
+    font-size: 0.8rem;
+    color: var(--default);
+}
+
+.fish-card-canvas {
+    width: 80px;
+    height: 40px;
+    image-rendering: pixelated;
+}
+
+.glossary-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.glossary-controls button {
+    background-color: transparent;
+    border: 1px solid var(--default);
+    color: var(--default);
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.glossary-controls button:hover:not(:disabled) {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.glossary-controls button:disabled {
+    border-color: #ccc;
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+.loading-spinner {
+    border: 4px solid #f3f3f3; 
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite;
+    margin: 2rem auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
 @media (max-width: 768px) {
     #pixel-battle-section {
         display: none;
