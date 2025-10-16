@@ -258,11 +258,18 @@ header {
 }
 
 /* Glossary Page */
+.glossary-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem; /* Space below controls */
+}
+
 .glossary-list {
     display: flex;
     flex-direction: column;
     gap: 0.5rem; /* Tighter spacing */
-    margin-bottom: 1.5rem; /* Add margin at the bottom */
 }
 
 .fish-card {
@@ -284,15 +291,12 @@ header {
 }
 
 .fish-card.is-user-fish {
-    border: 1px solid var(--primary); /* Keep border for user fish */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    order: -1; /* Always show user fish first */
+    border: 1px solid var(--primary);
 }
 
 #user-fish-container .fish-card {
     margin-bottom: 0.5rem; /* Spacing between user fish and the main list */
 }
-
 
 .fish-card-info {
     flex-grow: 1;
@@ -310,17 +314,10 @@ header {
     color: var(--default);
 }
 
-.fish-card-canvas {
+.fish-card-image {
     width: 80px;
     height: 40px;
     image-rendering: pixelated;
-}
-
-.glossary-controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
 }
 
 .glossary-controls button {
