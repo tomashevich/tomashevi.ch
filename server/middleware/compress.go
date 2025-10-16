@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/andybalholm/brotli"
 	"github.com/klauspost/compress/zstd"
 )
 
@@ -27,6 +28,14 @@ func Compress() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			acceptEncoding := r.Header.Get("Accept-Encoding")
+
+			if strings.Contains(acceptEncoding, "br") {
+				brotliWriter := brotli.NewWriterV2(w, 9)
+				w.Header().Set("Content-Encoding", "br")
+				defer brotliWriter.Close()
+				next.ServeHTTP(CompressResponseWriter{ResponseWriter: w, writer: brotliWriter}, r)
+				return
+			}
 
 			if strings.Contains(acceptEncoding, "zstd") {
 				enc, err := zstd.NewWriter(w, zstd.WithEncoderLevel(zstd.SpeedBestCompression))
