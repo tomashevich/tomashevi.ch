@@ -29,7 +29,7 @@ func (s Server) Run() error {
 
 	stack := middleware.MiddlewareStack(
 		middleware.Helheim(s.database),
-		middleware.Gzip(),
+		middleware.Compress(),
 	)
 
 	server := http.Server{
