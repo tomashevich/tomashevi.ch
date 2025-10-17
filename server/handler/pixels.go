@@ -12,6 +12,10 @@ func RegisterPixels(m *http.ServeMux, db *database.Database) {
 	paintPixel(m, db)
 }
 
+type listPixelsResponse struct {
+	Pixels []database.Pixel `json:"pixels"`
+}
+
 func listPixels(m *http.ServeMux, db *database.Database) {
 	m.HandleFunc("GET /pixels", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -26,7 +30,7 @@ func listPixels(m *http.ServeMux, db *database.Database) {
 			pixels = make([]database.Pixel, 0)
 		}
 
-		json.NewEncoder(w).Encode(pixels)
+		json.NewEncoder(w).Encode(listPixelsResponse{pixels})
 	})
 }
 

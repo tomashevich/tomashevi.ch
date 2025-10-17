@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return response.json();
         })
         .then((pixels) => {
-          pixels.forEach((pixel) => {
+          pixels.pixels.forEach((pixel) => {
             if (this.textPixels[pixel.y] && this.textPixels[pixel.y][pixel.x]) {
               this.ctx.fillStyle = pixel.color;
               this.ctx.fillRect(pixel.x * this.pixelSize, pixel.y * this.pixelSize, this.pixelSize, this.pixelSize);
@@ -642,146 +642,148 @@ document.addEventListener("DOMContentLoaded", () => {
     ITEMS_PER_PAGE: 20,
 
     init() {
-        // Reset UI-related state
-        this.glossaryPage = 1;
-        this.imageCache.clear(); // Clear the image cache as well for simplicity
+      // Reset UI-related state
+      this.glossaryPage = 1;
+      this.imageCache.clear(); // Clear the image cache as well for simplicity
 
-        this.listContainer = document.getElementById("glossary-list");
-        this.controlsContainer = document.getElementById("glossary-controls");
-        this.userFishContainer = document.getElementById("user-fish-container");
-        if (!this.listContainer || !this.controlsContainer || !this.userFishContainer) return;
+      this.listContainer = document.getElementById("glossary-list");
+      this.controlsContainer = document.getElementById("glossary-controls");
+      this.userFishContainer = document.getElementById("user-fish-container");
+      if (!this.listContainer || !this.controlsContainer || !this.userFishContainer) return;
 
-        this.userFishContainer.innerHTML = '';
-        this.listContainer.innerHTML = '<div class="loading-spinner"></div>';
-        this.renderInitial();
+      this.userFishContainer.innerHTML = "";
+      this.listContainer.innerHTML = '<div class="loading-spinner"></div>';
+      this.renderInitial();
     },
 
     async renderInitial() {
-        const userFishSeed = await App.getUserFishSeed();
-        if (userFishSeed) {
-            const userCard = this.createFishCard(userFishSeed, true);
-            this.userFishContainer.appendChild(userCard);
-        }
-        this.renderPage(1);
+      const userFishSeed = await App.getUserFishSeed();
+      if (userFishSeed) {
+        const userCard = this.createFishCard(userFishSeed, true);
+        this.userFishContainer.appendChild(userCard);
+      }
+      this.renderPage(1);
     },
 
     async renderPage(page) {
-        this.glossaryPage = page;
-        this.listContainer.innerHTML = '<div class="loading-spinner"></div>';
+      this.glossaryPage = page;
+      this.listContainer.innerHTML = '<div class="loading-spinner"></div>';
 
-        const start = (page - 1) * this.ITEMS_PER_PAGE;
-        const end = start + this.ITEMS_PER_PAGE;
+      const start = (page - 1) * this.ITEMS_PER_PAGE;
+      const end = start + this.ITEMS_PER_PAGE;
 
-        while (App.glossaryData.allSeeds.length < end && App.glossaryData.hasMoreData) {
-            await App.fetchMoreGlossaryFish();
+      while (App.glossaryData.allSeeds.length < end && App.glossaryData.hasMoreData) {
+        await App.fetchMoreGlossaryFish();
+      }
+
+      this.listContainer.innerHTML = "";
+      const seedsForPage = App.glossaryData.allSeeds.slice(start, end);
+      const fragment = document.createDocumentFragment();
+
+      seedsForPage.forEach((seed) => {
+        if (seed !== App.userFishSeed) {
+          const card = this.createFishCard(seed, false);
+          fragment.appendChild(card);
         }
+      });
 
-        this.listContainer.innerHTML = '';
-        const seedsForPage = App.glossaryData.allSeeds.slice(start, end);
-        const fragment = document.createDocumentFragment();
-
-        seedsForPage.forEach(seed => {
-            if (seed !== App.userFishSeed) {
-                const card = this.createFishCard(seed, false);
-                fragment.appendChild(card);
-            }
-        });
-
-        this.listContainer.appendChild(fragment);
-        this.renderControls();
+      this.listContainer.appendChild(fragment);
+      this.renderControls();
     },
 
     renderControls() {
-        this.controlsContainer.innerHTML = '';
+      this.controlsContainer.innerHTML = "";
 
-        const prevButton = document.createElement('button');
-        prevButton.title = 'Previous Page';
-        prevButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>';
-        prevButton.disabled = this.glossaryPage === 1;
-        prevButton.addEventListener('click', () => this.renderPage(this.glossaryPage - 1));
+      const prevButton = document.createElement("button");
+      prevButton.title = "Previous Page";
+      prevButton.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>';
+      prevButton.disabled = this.glossaryPage === 1;
+      prevButton.addEventListener("click", () => this.renderPage(this.glossaryPage - 1));
 
-        const nextButton = document.createElement('button');
-        nextButton.title = 'Next Page';
-        nextButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
-        const isLastPage = (this.glossaryPage * this.ITEMS_PER_PAGE) >= App.glossaryData.allSeeds.length;
-        nextButton.disabled = isLastPage && !App.glossaryData.hasMoreData;
-        nextButton.addEventListener('click', () => this.renderPage(this.glossaryPage + 1));
+      const nextButton = document.createElement("button");
+      nextButton.title = "Next Page";
+      nextButton.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+      const isLastPage = this.glossaryPage * this.ITEMS_PER_PAGE >= App.glossaryData.allSeeds.length;
+      nextButton.disabled = isLastPage && !App.glossaryData.hasMoreData;
+      nextButton.addEventListener("click", () => this.renderPage(this.glossaryPage + 1));
 
-        this.controlsContainer.appendChild(prevButton);
-        this.controlsContainer.appendChild(nextButton);
+      this.controlsContainer.appendChild(prevButton);
+      this.controlsContainer.appendChild(nextButton);
     },
 
     createFishCard(seed, isUserFish = false) {
-        const card = document.createElement("div");
-        card.className = "fish-card";
-        if (isUserFish) {
-            card.classList.add("is-user-fish");
-        }
+      const card = document.createElement("div");
+      card.className = "fish-card";
+      if (isUserFish) {
+        card.classList.add("is-user-fish");
+      }
 
-        const image = document.createElement("img");
-        image.className = "fish-card-image";
-        image.src = this.getFishImageDataURL(seed);
+      const image = document.createElement("img");
+      image.className = "fish-card-image";
+      image.src = this.getFishImageDataURL(seed);
 
-        const info = document.createElement("div");
-        info.className = "fish-card-info";
+      const info = document.createElement("div");
+      info.className = "fish-card-info";
 
-        if (isUserFish) {
-            const title = document.createElement("h3");
-            title.textContent = "Your Fish";
-            info.appendChild(title);
-        }
+      if (isUserFish) {
+        const title = document.createElement("h3");
+        title.textContent = "Your Fish";
+        info.appendChild(title);
+      }
 
-        const date = this.getTimestampFromUUIDv7(seed);
-        const time = document.createElement("time");
-        time.setAttribute("datetime", date ? date.toISOString() : "");
-        time.textContent = date ? date.toLocaleString() : "Unknown date";
-        info.appendChild(time);
+      const date = this.getTimestampFromUUIDv7(seed);
+      const time = document.createElement("time");
+      time.setAttribute("datetime", date ? date.toISOString() : "");
+      time.textContent = date ? date.toLocaleString() : "Unknown date";
+      info.appendChild(time);
 
-        card.appendChild(image);
-        card.appendChild(info);
+      card.appendChild(image);
+      card.appendChild(info);
 
-        return card;
+      return card;
     },
 
     getFishImageDataURL(seed) {
-        if (this.imageCache.has(seed)) {
-            return this.imageCache.get(seed);
+      if (this.imageCache.has(seed)) {
+        return this.imageCache.get(seed);
+      }
+
+      const canvas = document.createElement("canvas");
+      const { fishData, palette, scale } = generateRandomFish(seed);
+      const pixelSize = 2 * scale;
+      const fishWidth = fishData[0].length * pixelSize;
+      const fishHeight = fishData.length * pixelSize;
+
+      canvas.width = fishWidth;
+      canvas.height = fishHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = false;
+
+      for (let r = 0; r < fishData.length; r++) {
+        for (let c = 0; c < fishData[r].length; c++) {
+          const colorIndex = fishData[r][c];
+          if (colorIndex) {
+            ctx.fillStyle = palette[colorIndex];
+            ctx.fillRect(c * pixelSize, r * pixelSize, pixelSize, pixelSize);
+          }
         }
+      }
 
-        const canvas = document.createElement('canvas');
-        const { fishData, palette, scale } = generateRandomFish(seed);
-        const pixelSize = 2 * scale;
-        const fishWidth = fishData[0].length * pixelSize;
-        const fishHeight = fishData.length * pixelSize;
-
-        canvas.width = fishWidth;
-        canvas.height = fishHeight;
-        const ctx = canvas.getContext("2d");
-        ctx.imageSmoothingEnabled = false;
-
-        for (let r = 0; r < fishData.length; r++) {
-            for (let c = 0; c < fishData[r].length; c++) {
-                const colorIndex = fishData[r][c];
-                if (colorIndex) {
-                    ctx.fillStyle = palette[colorIndex];
-                    ctx.fillRect(c * pixelSize, r * pixelSize, pixelSize, pixelSize);
-                }
-            }
-        }
-        
-        const dataURL = canvas.toDataURL();
-        this.imageCache.set(seed, dataURL);
-        return dataURL;
+      const dataURL = canvas.toDataURL();
+      this.imageCache.set(seed, dataURL);
+      return dataURL;
     },
 
     getTimestampFromUUIDv7(uuid) {
-        try {
-            const hex = uuid.substring(0, 13).replace("-", "");
-            const timestamp = parseInt(hex, 16);
-            return new Date(timestamp);
-        } catch (e) {
-            return null;
-        }
+      try {
+        const hex = uuid.substring(0, 13).replace("-", "");
+        const timestamp = parseInt(hex, 16);
+        return new Date(timestamp);
+      } catch (_) {
+        return null;
+      }
     },
   };
 
