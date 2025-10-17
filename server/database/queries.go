@@ -90,7 +90,7 @@ func (d Database) GetPixels(ctx context.Context) ([]Pixel, error) {
 	return pixels, nil
 }
 
-func (d Database) PaintPixel(ctx context.Context, soul_id, x, y int, color string) error {
+func (d Database) PaintPixel(ctx context.Context, soul_id, x, y int, color int) error {
 	if _, err := d.db.Exec("INSERT INTO pixels (soul_id, color, x, y) VALUES (?, ?, ?, ?)", soul_id, color, x, y); err != nil {
 		return err
 	}

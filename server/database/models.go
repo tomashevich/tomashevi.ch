@@ -8,8 +8,8 @@ type Soul struct {
 }
 
 type Pixel struct {
-	SoulId int    `json:"soul_id"`
-	Color  string `json:"color"`
-	X      int    `json:"x"`
-	Y      int    `json:"y"`
+	SoulId int `json:"soul_id"`
+	Color  int `json:"color"`
+	X      int `json:"x"`
+	Y      int `json:"y"`
 }

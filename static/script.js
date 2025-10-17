@@ -33,14 +33,22 @@ document.addEventListener("DOMContentLoaded", () => {
           if (!response.ok) throw new Error("Failed to load pixels");
           return response.json();
         })
-        .then((pixels) => {
-          pixels.pixels.forEach((pixel) => {
-            if (this.textPixels[pixel.y] && this.textPixels[pixel.y][pixel.x]) {
-              this.ctx.fillStyle = pixel.color;
-              this.ctx.fillRect(pixel.x * this.pixelSize, pixel.y * this.pixelSize, this.pixelSize, this.pixelSize);
-              this.ctx.strokeRect(pixel.x * this.pixelSize, pixel.y * this.pixelSize, this.pixelSize, this.pixelSize);
+        .then((data) => {
+          // Create a reverse map from ID to color name
+          const colorMap = Object.fromEntries(Object.entries(data.allowed_colors).map(([name, id]) => [id, name]));
+
+          for (let i = 0; i < data.x.length; i++) {
+            const pixelX = data.x[i];
+            const pixelY = data.y[i];
+            const colorId = data.colors[i];
+            const colorName = colorMap[colorId];
+
+            if (colorName && this.textPixels[pixelY] && this.textPixels[pixelY][pixelX]) {
+              this.ctx.fillStyle = colorName;
+              this.ctx.fillRect(pixelX * this.pixelSize, pixelY * this.pixelSize, this.pixelSize, this.pixelSize);
+              this.ctx.strokeRect(pixelX * this.pixelSize, pixelY * this.pixelSize, this.pixelSize, this.pixelSize);
             }
-          });
+          }
         })
         .catch((error) => console.error("Error loading pixels:", error));
     }

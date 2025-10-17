@@ -35,7 +35,7 @@ func NewDatabase(database string) (*Database, error) {
 
 	tables := []string{
 		"CREATE TABLE IF NOT EXISTS souls (id INTEGER PRIMARY KEY, address VARCHAR(39) NOT NULL UNIQUE, seed VARCHAR(32), painted_pixels INTEGER NOT NULL DEFAULT 0)",
-		"CREATE TABLE IF NOT EXISTS pixels (soul_id INTEGER NOT NULL REFERENCES souls(id), color TEXT NOT NULL, x INT NOT NULL, y INT NOT NULL, PRIMARY KEY (x, y))",
+		"CREATE TABLE IF NOT EXISTS pixels (soul_id INTEGER NOT NULL REFERENCES souls(id), color INTEGER NOT NULL, x INT NOT NULL, y INT NOT NULL, PRIMARY KEY (x, y))",
 	}
 	tx, err := db.Begin()
 	if err != nil {

@@ -12,8 +12,22 @@ func RegisterPixels(m *http.ServeMux, db *database.Database) {
 	paintPixel(m, db)
 }
 
+var allowedColors = map[string]int{
+	"black":  1,
+	"white":  2,
+	"red":    3,
+	"green":  4,
+	"blue":   5,
+	"yellow": 6,
+	"purple": 7,
+	"orange": 8,
+}
+
 type listPixelsResponse struct {
-	Pixels []database.Pixel `json:"pixels"`
+	AllowedColors map[string]int `json:"allowed_colors"`
+	Colors        []int          `json:"colors"`
+	X             []int          `json:"x"`
+	Y             []int          `json:"y"`
 }
 
 func listPixels(m *http.ServeMux, db *database.Database) {
@@ -30,7 +44,16 @@ func listPixels(m *http.ServeMux, db *database.Database) {
 			pixels = make([]database.Pixel, 0)
 		}
 
-		json.NewEncoder(w).Encode(listPixelsResponse{pixels})
+		colors := make([]int, 0)
+		x := make([]int, 0)
+		y := make([]int, 0)
+		for _, pixel := range pixels {
+			colors = append(colors, pixel.Color)
+			x = append(x, pixel.X)
+			y = append(y, pixel.Y)
+		}
+
+		json.NewEncoder(w).Encode(listPixelsResponse{allowedColors, colors, x, y})
 	})
 }
 
@@ -59,17 +82,8 @@ func paintPixel(m *http.ServeMux, db *database.Database) {
 
 		defer r.Body.Close()
 
-		validColors := map[string]bool{
-			"black":  true,
-			"white":  true,
-			"red":    true,
-			"green":  true,
-			"blue":   true,
-			"yellow": true,
-			"purple": true,
-			"orange": true,
-		}
-		if _, ok := validColors[data.Color]; !ok {
+		color, ok := allowedColors[data.Color]
+		if !ok {
 			http.Error(w, "invalid color", http.StatusUnprocessableEntity)
 			return
 		}
@@ -79,7 +93,7 @@ func paintPixel(m *http.ServeMux, db *database.Database) {
 			return
 		}
 
-		if err := db.PaintPixel(r.Context(), id, data.X, data.Y, data.Color); err != nil {
+		if err := db.PaintPixel(r.Context(), id, data.X, data.Y, color); err != nil {
 			http.Error(w, "cant paint this pixel", http.StatusInternalServerError)
 			return
 		}
