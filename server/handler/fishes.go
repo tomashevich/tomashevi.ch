@@ -24,8 +24,7 @@ func listFishes(m *http.ServeMux, db *database.Database) {
 		pageQuery := r.URL.Query().Get("page")
 		page, _ := strconv.ParseInt(pageQuery, 10, 32)
 		if page <= 0 {
-			http.Error(w, "Page param must be uint", http.StatusUnprocessableEntity)
-			return
+			page = 0
 		}
 		page -= 1
 
