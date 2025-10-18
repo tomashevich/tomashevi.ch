@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 	"tomashevich/server/database"
 	"tomashevich/server/middleware"
 )
@@ -20,6 +21,7 @@ type listFishesResponse struct {
 func listFishes(m *http.ServeMux, db *database.Database) {
 	m.HandleFunc("GET /fishes", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		middleware.SetCacheRule(w, time.Hour*1)
 
 		pageQuery := r.URL.Query().Get("page")
 		page, _ := strconv.ParseInt(pageQuery, 10, 32)
@@ -49,6 +51,7 @@ type getFishResponse struct {
 func getFish(m *http.ServeMux, db *database.Database) {
 	m.HandleFunc("GET /fishes/me", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+		middleware.SetCacheRule(w, time.Hour*1)
 
 		id := middleware.GetSoulID(r.Context())
 		if id == 0 {

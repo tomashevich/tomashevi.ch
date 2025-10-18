@@ -4,6 +4,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"time"
 
 	"tomashevich/server/database"
 	"tomashevich/server/handler"
@@ -38,7 +39,7 @@ func (s Server) Run() error {
 	}
 
 	// Register static files
-	router.Handle("/", http.FileServerFS(s.staticFiles))
+	router.Handle("/", middleware.Cache(time.Hour*24)(http.FileServerFS(s.staticFiles)))
 
 	// Register API handler
 	handler.RegisterFishes(router, s.database)
