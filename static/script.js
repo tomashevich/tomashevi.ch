@@ -1,7 +1,7 @@
 `use strict`;
 
 window.onload = () => {
-    document.body.classList.add('loaded');
+  document.body.classList.add("loaded");
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -360,14 +360,24 @@ document.addEventListener("DOMContentLoaded", () => {
       this.fillSeedBuffer();
     }
 
-    start() {
-      this.fillSeedBuffer();
-      setInterval(() => this.addFish(), INFINITE_CANVAS_CONFIG.ADD_FISH_INTERVAL_MS);
-      this.animate();
+    resize(width, height) {
+      this.canvasWidth = width;
+      this.canvasHeight = height;
+      for (const fish of this.fishes) {
+        fish.canvasWidth = width;
+        fish.canvasHeight = height;
+      }
     }
 
-    animate() {
+    start(seaweedManager) {
+      this.fillSeedBuffer();
+      setInterval(() => this.addFish(), INFINITE_CANVAS_CONFIG.ADD_FISH_INTERVAL_MS);
+      this.animate(seaweedManager);
+    }
+
+    animate(seaweedManager) {
       this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+      seaweedManager.animate();
       for (const fish of this.fishes) {
         fish.update();
         fish.draw();
@@ -379,7 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
           this.fillSeedBuffer();
         }
       }
-      requestAnimationFrame(() => this.animate());
+      requestAnimationFrame(() => this.animate(seaweedManager));
     }
   }
 
@@ -402,6 +412,117 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
       ctx.fillStyle = INFINITE_CANVAS_CONFIG.BUBBLE_COLOR;
       ctx.fill();
+    }
+
+    resize(width, height) {
+      this.canvasWidth = width;
+      this.canvasHeight = height;
+    }
+  }
+
+  const SEAWEED_CONFIG = {
+    PIXEL_SIZE: 4,
+    COLOR_1: "#004d00",
+    COLOR_2: "#006400",
+    SHADOW_COLOR: "rgba(0, 0, 0, 0.2)",
+    SHADOW_OFFSET_X: 2,
+    SHADOW_OFFSET_Y: 2,
+    SWAY_AMPLITUDE: 10,
+    SWAY_SPEED: 0.01,
+    COUNT: 15,
+    MOBILE_COUNT: 5,
+    MAX_WIDTH: 3, // Max width in pixels
+    HEIGHT_MULTIPLIER: 0.4, // Fraction of canvas height
+  };
+
+  class Seaweed {
+    constructor(ctx, canvasWidth, canvasHeight, x) {
+      this.ctx = ctx;
+      this.canvasWidth = canvasWidth;
+      this.canvasHeight = canvasHeight;
+      this.x = x;
+      this.baseHeight = Math.random() * 0.4 + 0.2;
+      this.height = this.baseHeight * this.canvasHeight * SEAWEED_CONFIG.HEIGHT_MULTIPLIER;
+      if (this.canvasWidth > 768) {
+        this.height *= 1.5; // Longer on desktops
+      }
+      this.segments = Math.floor(this.height / SEAWEED_CONFIG.PIXEL_SIZE);
+      this.sway = Math.random() * Math.PI * 2;
+    }
+
+    update() {
+      this.sway += SEAWEED_CONFIG.SWAY_SPEED;
+    }
+
+    resize(width, height) {
+      this.canvasWidth = width;
+      this.canvasHeight = height;
+      this.height = this.baseHeight * this.canvasHeight * SEAWEED_CONFIG.HEIGHT_MULTIPLIER;
+      if (this.canvasWidth > 768) {
+        this.height *= 1.5; // Longer on desktops
+      }
+      this.segments = Math.floor(this.height / SEAWEED_CONFIG.PIXEL_SIZE);
+    }
+
+    draw() {
+      for (let i = 0; i < this.segments; i++) {
+        const y = this.canvasHeight - i * SEAWEED_CONFIG.PIXEL_SIZE;
+        const swayX = Math.sin(this.sway + i * 0.1) * SEAWEED_CONFIG.SWAY_AMPLITUDE * (i / this.segments);
+        const x = this.x + swayX;
+
+        const width = Math.max(1, Math.floor(SEAWEED_CONFIG.MAX_WIDTH * (1 - i / this.segments)));
+
+        // Draw shadow
+        this.ctx.fillStyle = SEAWEED_CONFIG.SHADOW_COLOR;
+        this.ctx.fillRect(
+          x - Math.floor(width / 2) * SEAWEED_CONFIG.PIXEL_SIZE + SEAWEED_CONFIG.SHADOW_OFFSET_X,
+          y + SEAWEED_CONFIG.SHADOW_OFFSET_Y,
+          width * SEAWEED_CONFIG.PIXEL_SIZE,
+          SEAWEED_CONFIG.PIXEL_SIZE,
+        );
+
+        // Draw seaweed
+        this.ctx.fillStyle = i % 2 === 0 ? SEAWEED_CONFIG.COLOR_1 : SEAWEED_CONFIG.COLOR_2;
+        this.ctx.fillRect(
+          x - Math.floor(width / 2) * SEAWEED_CONFIG.PIXEL_SIZE,
+          y,
+          width * SEAWEED_CONFIG.PIXEL_SIZE,
+          SEAWEED_CONFIG.PIXEL_SIZE,
+        );
+      }
+    }
+  }
+
+  class SeaweedManager {
+    constructor(ctx, canvasWidth, canvasHeight) {
+      this.ctx = ctx;
+      this.canvasWidth = canvasWidth;
+      this.canvasHeight = canvasHeight;
+      this.seaweeds = [];
+      this.init();
+    }
+
+    init() {
+      const count = this.canvasWidth > 768 ? SEAWEED_CONFIG.COUNT : SEAWEED_CONFIG.MOBILE_COUNT;
+      for (let i = 0; i < count; i++) {
+        const x = Math.random() * this.canvasWidth;
+        this.seaweeds.push(new Seaweed(this.ctx, this.canvasWidth, this.canvasHeight, x));
+      }
+    }
+
+    animate() {
+      for (const seaweed of this.seaweeds) {
+        seaweed.update();
+        seaweed.draw();
+      }
+    }
+
+    resize(width, height) {
+      this.canvasWidth = width;
+      this.canvasHeight = height;
+      for (const seaweed of this.seaweeds) {
+        seaweed.resize(width, height);
+      }
     }
   }
 
@@ -861,6 +982,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const bubbleCanvas = document.getElementById("bubble-canvas");
       const bubbleCtx = bubbleCanvas.getContext("2d");
 
+      let fishManager, seaweedManager, bubbles;
+
       const resizeCanvases = () => {
         const width = window.innerWidth;
         const height = window.innerHeight;
@@ -868,14 +991,27 @@ document.addEventListener("DOMContentLoaded", () => {
         infiniteCanvas.height = height;
         bubbleCanvas.width = width;
         bubbleCanvas.height = height;
+
+        if (fishManager) {
+          fishManager.resize(width, height);
+        }
+        if (seaweedManager) {
+          seaweedManager.resize(width, height);
+        }
+        if (bubbles) {
+          for (const bubble of bubbles) {
+            bubble.resize(width, height);
+          }
+        }
       };
       window.addEventListener("resize", resizeCanvases);
       resizeCanvases();
 
-      const fishManager = new FishManager(infiniteCtx, infiniteCanvas.width, infiniteCanvas.height);
-      fishManager.start();
+      fishManager = new FishManager(infiniteCtx, infiniteCanvas.width, infiniteCanvas.height);
+      seaweedManager = new SeaweedManager(infiniteCtx, infiniteCanvas.width, infiniteCanvas.height);
+      fishManager.start(seaweedManager);
 
-      const bubbles = [];
+      bubbles = [];
       const animateBubbles = () => {
         bubbleCtx.clearRect(0, 0, bubbleCanvas.width, bubbleCanvas.height);
         if (Math.random() < INFINITE_CANVAS_CONFIG.BUBBLE_SPAWN_CHANCE) {

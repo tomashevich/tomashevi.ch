@@ -93,7 +93,7 @@ header {
     font-weight: 900;
     padding: 0.5rem 1rem;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease-in-out;
 }
 
@@ -101,9 +101,8 @@ header {
     color: var(--background);
     background-color: var(--primary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-
 
 .social-links {
     display: grid;
@@ -116,7 +115,7 @@ header {
     color: var(--default);
     padding: 1rem;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease-in-out;
     display: flex;
     align-items: center;
@@ -143,7 +142,7 @@ header {
     color: var(--background);
     background-color: var(--primary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .social-link:hover img {
@@ -281,13 +280,13 @@ header {
     gap: 1rem;
     padding: 0.5rem;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease-in-out;
 }
 
 .fish-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .fish-card.is-user-fish {
@@ -331,7 +330,10 @@ header {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    transition:
+        background-color 0.2s ease-in-out,
+        color 0.2s ease-in-out,
+        border-color 0.2s ease-in-out;
 }
 
 .glossary-controls button:hover:not(:disabled) {
@@ -347,7 +349,7 @@ header {
 }
 
 .loading-spinner {
-    border: 4px solid #f3f3f3; 
+    border: 4px solid #f3f3f3;
     border-top: 4px solid var(--primary);
     border-radius: 50%;
     width: 40px;
@@ -357,121 +359,79 @@ header {
 }
 
 @keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
 
-    0% { transform: rotate(0deg); }
-
-    100% { transform: rotate(360deg); }
-
+    100% {
+        transform: rotate(360deg);
+    }
 }
-
-
-
-
 
 @media (max-width: 768px) {
-
     #pixel-battle-section {
-
         display: none;
-
     }
-
-
 
     .container {
-
         padding: 1rem;
-
         gap: 2rem;
-
     }
-
-
 
     h1 {
-
         font-size: 2rem;
-
     }
-
-
 
     h2 {
-
         font-size: 1.25rem;
-
     }
-
-
 
     .social-links {
-
         grid-template-columns: 1fr;
-
     }
-
-
 
     .player-footer {
-
-        padding: 0.5rem 1rem;
-
+        position: static;
+        padding: 1rem;
     }
 
+    header {
+        justify-content: center;
+    }
+
+    .social-link span {
+        font-size: 0.9rem;
+    }
+
+    body {
+        text-align: center;
+    }
 }
-
-
 
 #loader {
-
     position: fixed;
-
     left: 0;
-
     top: 0;
-
     width: 100%;
-
     height: 100%;
-
     z-index: 9999;
-
     background: var(--background);
-
     display: flex;
-
     justify-content: center;
-
     align-items: center;
-
     transition: opacity 0.5s;
-
 }
-
-
 
 .spinner {
-
     border: 8px solid #f3f3f3;
-
     border-top: 8px solid var(--primary);
-
     border-radius: 50%;
-
     width: 60px;
-
     height: 60px;
-
     animation: spin 2s linear infinite;
-
 }
 
-
-
 body.loaded #loader {
-
     opacity: 0;
-
     pointer-events: none;
-
 }
