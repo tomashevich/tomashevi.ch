@@ -44,9 +44,11 @@ func listPixels(m *http.ServeMux, db *database.Database) {
 			pixels = make([]database.Pixel, 0)
 		}
 
-		colors := make([]int, 0)
-		x := make([]int, 0)
-		y := make([]int, 0)
+		capacity := len(pixels)
+
+		colors := make([]int, 0, capacity)
+		x := make([]int, 0, capacity)
+		y := make([]int, 0, capacity)
 		for _, pixel := range pixels {
 			colors = append(colors, pixel.Color)
 			x = append(x, pixel.X)
