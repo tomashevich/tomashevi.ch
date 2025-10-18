@@ -1,5 +1,9 @@
 `use strict`;
 
+window.onload = () => {
+    document.body.classList.add('loaded');
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   // --- CLASSES (self-contained modules) ---
 

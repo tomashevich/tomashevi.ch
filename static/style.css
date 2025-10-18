@@ -357,34 +357,121 @@ header {
 }
 
 @keyframes spin {
+
     0% { transform: rotate(0deg); }
+
     100% { transform: rotate(360deg); }
+
 }
 
 
+
+
+
 @media (max-width: 768px) {
+
     #pixel-battle-section {
+
         display: none;
+
     }
+
+
 
     .container {
+
         padding: 1rem;
+
         gap: 2rem;
+
     }
+
+
 
     h1 {
+
         font-size: 2rem;
+
     }
+
+
 
     h2 {
+
         font-size: 1.25rem;
+
     }
+
+
 
     .social-links {
+
         grid-template-columns: 1fr;
+
     }
 
+
+
     .player-footer {
+
         padding: 0.5rem 1rem;
+
     }
+
+}
+
+
+
+#loader {
+
+    position: fixed;
+
+    left: 0;
+
+    top: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    z-index: 9999;
+
+    background: var(--background);
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    transition: opacity 0.5s;
+
+}
+
+
+
+.spinner {
+
+    border: 8px solid #f3f3f3;
+
+    border-top: 8px solid var(--primary);
+
+    border-radius: 50%;
+
+    width: 60px;
+
+    height: 60px;
+
+    animation: spin 2s linear infinite;
+
+}
+
+
+
+body.loaded #loader {
+
+    opacity: 0;
+
+    pointer-events: none;
+
 }
