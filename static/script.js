@@ -139,9 +139,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
-      const gridWidth = this.textPixels[0].length;
-      const pixelX = Math.floor(x / (rect.width / gridWidth));
-      const pixelY = Math.floor(y / (rect.height / this.textPixels.length));
+      const clickX = (x / rect.width) * this.canvas.width;
+      const clickY = (y / rect.height) * this.canvas.height;
+
+      const pixelX = Math.floor(clickX / this.pixelSize);
+      const pixelY = Math.floor(clickY / this.pixelSize);
 
       if (!this.textPixels[pixelY]?.[pixelX]) {
         return;
