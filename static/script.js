@@ -516,13 +516,13 @@ document.addEventListener("DOMContentLoaded", () => {
       isLoading: false,
     },
 
-    init() {
+    async init() {
       this.contentContainer = document.getElementById("content-container");
       this.navLinks = document.querySelectorAll(".nav-link");
 
       this.setupEventListeners();
       this.loadContent("home");
-      this.initCanvases();
+      await this.initCanvases();
     },
 
     async getUserFishSeed() {
@@ -599,7 +599,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     },
 
-    initCanvases() {
+    async initCanvases() {
+      await document.fonts.load("bold 200px Lato");
       new PixelBattle("pixel-canvas", "tomashevich", "bold 200px Lato");
       const infiniteCanvas = document.getElementById("infinite-canvas");
       const infiniteCtx = infiniteCanvas.getContext("2d");
