@@ -21,6 +21,14 @@ func NewDatabase(database string) (*Database, error) {
 		return nil, err
 	}
 
+	setupDatabase(db)
+
+	return &Database{
+		db,
+	}, nil
+}
+
+func setupDatabase(db *sql.DB) error {
 	pragmas := []string{
 		"PRAGMA foreign_keys = ON",
 		"PRAGMA journal_mode = WAL",
@@ -39,18 +47,15 @@ func NewDatabase(database string) (*Database, error) {
 	}
 	tx, err := db.Begin()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	for _, table := range tables {
 		if _, err := tx.Exec(table); err != nil {
-			return nil, err
+			return err
 		}
 	}
-	tx.Commit()
 
-	return &Database{
-		db,
-	}, nil
+	return tx.Commit()
 }
 
 func (d Database) Close() {
