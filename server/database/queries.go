@@ -109,11 +109,21 @@ func (d Database) GetPixels(ctx context.Context) ([]Pixel, error) {
 }
 
 func (d Database) PaintPixel(ctx context.Context, soul_id, x, y int, color int) error {
-	if _, err := d.db.ExecContext(ctx, "UPDATE pixels SET soul_id=?, color=? WHERE x=? AND y=?", soul_id, color, x, y); err != nil {
+	tx, err := d.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	if _, err := tx.ExecContext(ctx, "UPDATE souls SET painted_pixels = painted_pixels + 1 WHERE id=?", soul_id); err != nil {
 		return err
 	}
 
-	return nil
+	if _, err := tx.ExecContext(ctx, "UPDATE pixels SET soul_id=?, color=? WHERE x=? AND y=?", soul_id, color, x, y); err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (d Database) IsPixelFieldInited(ctx context.Context) (bool, error) {
