@@ -19,7 +19,8 @@ type listFishesResponse struct {
 }
 
 func listFishes(m *http.ServeMux, db *database.Database) {
-	m.HandleFunc("GET /fishes", func(w http.ResponseWriter, r *http.Request) {
+	const path = "GET /fishes"
+	m.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		pageQuery := r.URL.Query().Get("page")
@@ -48,7 +49,8 @@ type getFishResponse struct {
 }
 
 func getFish(m *http.ServeMux, db *database.Database) {
-	m.HandleFunc("GET /fishes/me", func(w http.ResponseWriter, r *http.Request) {
+	const path = "GET /fishes/me"
+	m.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		middleware.SetCacheRule(w, time.Hour*168) // week
 

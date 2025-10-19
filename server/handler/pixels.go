@@ -33,7 +33,8 @@ type listPixelsResponse struct {
 }
 
 func listPixels(m *http.ServeMux, db *database.Database) {
-	m.HandleFunc("GET /pixels", func(w http.ResponseWriter, r *http.Request) {
+	const path = "GET /pixels"
+	m.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		pixels, err := db.GetPixels(r.Context())
@@ -68,7 +69,8 @@ type paintPixelData struct {
 }
 
 func paintPixel(m *http.ServeMux, db *database.Database) {
-	m.HandleFunc("POST /pixels:paint", func(w http.ResponseWriter, r *http.Request) {
+	const path = "POST /pixels:paint"
+	m.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		id := middleware.GetSoulID(r.Context())
@@ -123,7 +125,8 @@ type registerPixelsData struct {
 }
 
 func registerPixels(m *http.ServeMux, db *database.Database) {
-	m.HandleFunc("POST /pixels:register", func(w http.ResponseWriter, r *http.Request) {
+	const path = "POST /pixels:register"
+	m.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		id := middleware.GetSoulID(r.Context())
 		if id == 0 {
 			http.Error(w, "cant get your soul", http.StatusInternalServerError)
