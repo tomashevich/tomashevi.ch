@@ -21,14 +21,15 @@ func NewDatabase(database string) (*Database, error) {
 		return nil, err
 	}
 
-	setupDatabase(db)
+	enablePragmas(db)
+	createTables(db)
 
 	return &Database{
 		db,
 	}, nil
 }
 
-func setupDatabase(db *sql.DB) error {
+func enablePragmas(db *sql.DB) {
 	pragmas := []string{
 		"PRAGMA foreign_keys = ON",
 		"PRAGMA journal_mode = WAL",
@@ -40,7 +41,9 @@ func setupDatabase(db *sql.DB) error {
 			log.Printf("pragma %s has error %s", pragma, err.Error())
 		}
 	}
+}
 
+func createTables(db *sql.DB) error {
 	tables := []string{
 		"CREATE TABLE IF NOT EXISTS souls (id INTEGER PRIMARY KEY, address VARCHAR(39) NOT NULL UNIQUE, seed VARCHAR(32), painted_pixels INTEGER NOT NULL DEFAULT 0)",
 		"CREATE TABLE IF NOT EXISTS pixels (soul_id INTEGER NOT NULL REFERENCES souls(id), color INTEGER NOT NULL, x INT NOT NULL, y INT NOT NULL, PRIMARY KEY (x, y))",
