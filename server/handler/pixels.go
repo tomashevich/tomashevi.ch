@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 	"tomashevich/server/database"
 	"tomashevich/server/middleware"
 )
@@ -10,6 +11,7 @@ import (
 func RegisterPixels(m *http.ServeMux, db *database.Database) {
 	listPixels(m, db)
 	paintPixel(m, db)
+	registerPixels(m, db)
 }
 
 var allowedColors = map[string]int{
@@ -75,14 +77,20 @@ func paintPixel(m *http.ServeMux, db *database.Database) {
 			return
 		}
 
-		var data paintPixelData
-		err := json.NewDecoder(r.Body).Decode(&data)
+		soul, err := db.GetSoul(r.Context(), id)
 		if err != nil {
-			http.Error(w, "invalid form", http.StatusUnprocessableEntity)
+			http.Error(w, "cant get your soul", http.StatusInternalServerError)
 			return
 		}
 
-		defer r.Body.Close()
+		var data paintPixelData
+		defer func() {
+			r.Body.Close()
+		}()
+		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+			http.Error(w, "invalid form", http.StatusUnprocessableEntity)
+			return
+		}
 
 		color, ok := allowedColors[data.Color]
 		if !ok {
@@ -95,11 +103,53 @@ func paintPixel(m *http.ServeMux, db *database.Database) {
 			return
 		}
 
-		if err := db.PaintPixel(r.Context(), id, data.X, data.Y, color); err != nil {
+		if soul.PaintedPixels >= 10 {
+			middleware.SetCacheRule(w, time.Hour*168) // dont send again pls
+			http.Error(w, "already painted maximum of pixels", http.StatusForbidden)
+			return
+		}
+
+		if err := db.PaintPixel(r.Context(), soul.Id, data.X, data.Y, color); err != nil {
 			http.Error(w, "cant paint this pixel", http.StatusInternalServerError)
 			return
 		}
 
 		w.WriteHeader(http.StatusNoContent)
 	})
+}
+
+type registerPixelsData struct {
+	Positions []database.PixelPosition `json:"pixels"`
+}
+
+func registerPixels(m *http.ServeMux, db *database.Database) {
+	m.HandleFunc("POST /pixels:register", func(w http.ResponseWriter, r *http.Request) {
+		id := middleware.GetSoulID(r.Context())
+		if id == 0 {
+			http.Error(w, "cant get your soul", http.StatusInternalServerError)
+			return
+		}
+
+		var data registerPixelsData
+		defer func() {
+			r.Body.Close()
+		}()
+		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+			http.Error(w, "invalid form", http.StatusUnprocessableEntity)
+			return
+		}
+
+		if ok, _ := db.IsPixelFieldInited(r.Context()); ok {
+			http.Error(w, "field already inited", http.StatusAlreadyReported)
+			return
+		}
+
+		if err := db.InitPixelField(r.Context(), data.Positions, id, allowedColors["white"]); err != nil {
+			http.Error(w, "cant init pixel field", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	})
+
 }

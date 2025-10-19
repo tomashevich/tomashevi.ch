@@ -32,16 +32,20 @@ document.addEventListener("DOMContentLoaded", () => {
       this.color = PIXEL_BATTLE_CONFIG.DEFAULT_COLOR;
       this.colorPicker = null;
       this.abortController = null;
-
-      this.init();
     }
 
-    init() {
+    async init() {
       this.setupCanvas();
       this.createTextGrid();
       this.drawGrid();
-      this.loadPixels();
       this.addEventListeners();
+
+      const data = await this.loadPixels();
+      const noPixelsFound = !data || data.x.length === 0;
+
+      if (noPixelsFound) {
+        this.registerClickablePixels();
+      }
     }
 
     async loadPixels() {
@@ -65,8 +69,10 @@ document.addEventListener("DOMContentLoaded", () => {
             this.ctx.strokeRect(pixelX * this.pixelSize, pixelY * this.pixelSize, this.pixelSize, this.pixelSize);
           }
         }
+        return data;
       } catch (error) {
         console.error("Error loading pixels:", error);
+        return null;
       }
     }
 
@@ -132,6 +138,31 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         this.showColorPicker(e.clientX, e.clientY);
       });
+    }
+
+    async registerClickablePixels() {
+      const clickablePixels = [];
+      for (let y = 0; y < this.textPixels.length; y++) {
+        for (let x = 0; x < this.textPixels[y].length; x++) {
+          if (this.textPixels[y][x]) {
+            clickablePixels.push({ x, y });
+          }
+        }
+      }
+
+      try {
+        const response = await fetch("/pixels:register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ pixels: clickablePixels }),
+        });
+
+        if (!response.ok) {
+          console.error("Failed to register pixels");
+        }
+      } catch (error) {
+        console.error("Error registering pixels:", error);
+      }
     }
 
     async handleCanvasClick(e) {
@@ -975,7 +1006,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async initCanvases() {
       await document.fonts.load("900 200px Lato");
-      new PixelBattle("pixel-canvas", "tomashevich", "900 200px Lato");
+      const pixelBattle = new PixelBattle("pixel-canvas", "tomashevich", "900 200px Lato");
+      await pixelBattle.init();
 
       const infiniteCanvas = document.getElementById("infinite-canvas");
       const infiniteCtx = infiniteCanvas.getContext("2d");

@@ -13,3 +13,9 @@ type Pixel struct {
 	X      int `json:"x"`
 	Y      int `json:"y"`
 }
+
+// For init field query
+type PixelPosition struct {
+	X int `json:"x"`
+	Y int `json:"y"`
+}

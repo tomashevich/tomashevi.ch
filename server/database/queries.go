@@ -1,9 +1,12 @@
 package database
 
-import "context"
+import (
+	"context"
+	"strings"
+)
 
 func (d Database) GiveSoulToHel(ctx context.Context, seed, address string) error {
-	if _, err := d.db.Exec("INSERT INTO souls (seed, address) VALUES (?, ?)", seed, address); err != nil {
+	if _, err := d.db.ExecContext(ctx, "INSERT INTO souls (seed, address) VALUES (?, ?)", seed, address); err != nil {
 		return err
 	}
 
@@ -11,7 +14,7 @@ func (d Database) GiveSoulToHel(ctx context.Context, seed, address string) error
 }
 
 func (d Database) GetSeed(ctx context.Context, id int) (string, error) {
-	row := d.db.QueryRow("SELECT seed FROM souls WHERE id=?", id)
+	row := d.db.QueryRowContext(ctx, "SELECT seed FROM souls WHERE id=?", id)
 	var seed string
 
 	if row.Err() != nil {
@@ -25,10 +28,25 @@ func (d Database) GetSeed(ctx context.Context, id int) (string, error) {
 	return seed, nil
 }
 
-func (d Database) GetSoulIDByIP(ctx context.Context, address string) (int, error) {
-	row := d.db.QueryRow("SELECT id FROM souls WHERE address=?", address)
-	var id int
+func (d Database) GetSoul(ctx context.Context, id int) (Soul, error) {
+	row := d.db.QueryRowContext(ctx, "SELECT * FROM souls WHERE id=?", id)
 
+	var soul Soul
+	if row.Err() != nil {
+		return soul, row.Err()
+	}
+
+	if err := row.Scan(&soul.Id, &soul.Address, &soul.Seed, &soul.PaintedPixels); err != nil {
+		return soul, err
+	}
+
+	return soul, nil
+}
+
+func (d Database) GetSoulIDByIP(ctx context.Context, address string) (int, error) {
+	row := d.db.QueryRowContext(ctx, "SELECT id FROM souls WHERE address=?", address)
+
+	var id int
 	if row.Err() != nil {
 		return id, row.Err()
 	}
@@ -66,7 +84,7 @@ func (d Database) GetSeeds(ctx context.Context, limit, offset int64) ([]string, 
 }
 
 func (d Database) GetPixels(ctx context.Context) ([]Pixel, error) {
-	rows, err := d.db.Query("SELECT * FROM pixels LIMIT 4000")
+	rows, err := d.db.QueryContext(ctx, "SELECT * FROM pixels")
 	var pixels []Pixel
 
 	if err != nil {
@@ -91,9 +109,45 @@ func (d Database) GetPixels(ctx context.Context) ([]Pixel, error) {
 }
 
 func (d Database) PaintPixel(ctx context.Context, soul_id, x, y int, color int) error {
-	if _, err := d.db.Exec("INSERT INTO pixels (soul_id, color, x, y) VALUES (?, ?, ?, ?)", soul_id, color, x, y); err != nil {
+	if _, err := d.db.ExecContext(ctx, "UPDATE pixels SET soul_id=?, color=? WHERE x=? AND y=?", soul_id, color, x, y); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (d Database) IsPixelFieldInited(ctx context.Context) (bool, error) {
+	row := d.db.QueryRowContext(ctx, "SELECT x FROM pixels LIMIT 1")
+
+	var x int
+	if err := row.Scan(&x); err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (d Database) InitPixelField(ctx context.Context, pixels []PixelPosition, soulID, color int) error {
+	if len(pixels) == 0 {
+		return nil
+	}
+
+	// we dont use static soulID and color bc zt
+	valuePlaceholder := "(?, ?, ?, ?)"
+	placeholders := make([]string, 0, len(pixels))
+
+	for range pixels {
+		placeholders = append(placeholders, valuePlaceholder)
+	}
+
+	args := make([]any, 0, len(pixels)*4)
+	for _, p := range pixels {
+		args = append(args, soulID, color, p.X, p.Y)
+	}
+
+	baseSQL := "INSERT OR REPLACE INTO pixels (soul_id, color, x, y) VALUES "
+	fullSQL := baseSQL + strings.Join(placeholders, ", ")
+
+	_, err := d.db.ExecContext(ctx, fullSQL, args...)
+	return err
 }
