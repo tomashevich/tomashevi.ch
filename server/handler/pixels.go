@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 	"tomashevich/server/database"
@@ -36,11 +35,9 @@ type listPixelsResponse struct {
 func listPixels(m *http.ServeMux, db *database.Database) {
 	const path = "GET /pixels"
 	m.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
 		pixels, err := db.GetPixels(r.Context())
 		if err != nil {
-			http.Error(w, "Can get pixels", http.StatusInternalServerError)
+			utils.WriteError(w, "Can get pixels", http.StatusInternalServerError)
 			return
 		}
 
@@ -59,7 +56,7 @@ func listPixels(m *http.ServeMux, db *database.Database) {
 			y = append(y, pixel.Y)
 		}
 
-		json.NewEncoder(w).Encode(listPixelsResponse{allowedColors, colors, x, y})
+		utils.WriteJSON(w, listPixelsResponse{allowedColors, colors, x, y}, http.StatusOK)
 	})
 }
 
@@ -72,46 +69,44 @@ type paintPixelData struct {
 func paintPixel(m *http.ServeMux, db *database.Database, config *utils.CacheConfig) {
 	const path = "POST /pixels:paint"
 	m.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
 		id := middleware.GetSoulID(r.Context())
 		if id == 0 {
-			http.Error(w, "cant get your soul", http.StatusInternalServerError)
+			utils.WriteError(w, "cant get your soul", http.StatusInternalServerError)
 			return
 		}
 
 		soul, err := db.GetSoul(r.Context(), id)
 		if err != nil {
-			http.Error(w, "cant get your soul", http.StatusInternalServerError)
+			utils.WriteError(w, "cant get your soul", http.StatusInternalServerError)
 			return
 		}
 
 		var data paintPixelData
 		defer r.Body.Close()
 		if err := utils.UnmarshalJSON(r.Body, &data); err != nil {
-			http.Error(w, "invalid form", http.StatusUnprocessableEntity)
+			utils.WriteError(w, "invalid form", http.StatusUnprocessableEntity)
 			return
 		}
 
 		color, ok := allowedColors[data.Color]
 		if !ok {
-			http.Error(w, "invalid color", http.StatusUnprocessableEntity)
+			utils.WriteError(w, "invalid color", http.StatusUnprocessableEntity)
 			return
 		}
 
 		if data.X < 0 || data.Y < 0 {
-			http.Error(w, "invalid x/y", http.StatusUnprocessableEntity)
+			utils.WriteError(w, "invalid x/y", http.StatusUnprocessableEntity)
 			return
 		}
 
 		if soul.PaintedPixels >= 10 {
 			middleware.SetCacheRule(w, time.Duration(config.PixelsLimit)) // dont send again pls
-			http.Error(w, "already painted maximum of pixels", http.StatusForbidden)
+			utils.WriteError(w, "already painted maximum of pixels", http.StatusForbidden)
 			return
 		}
 
 		if err := db.PaintPixel(r.Context(), soul.Id, data.X, data.Y, color); err != nil {
-			http.Error(w, "cant paint this pixel", http.StatusInternalServerError)
+			utils.WriteError(w, "cant paint this pixel", http.StatusInternalServerError)
 			return
 		}
 
@@ -128,24 +123,24 @@ func registerPixels(m *http.ServeMux, db *database.Database) {
 	m.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		id := middleware.GetSoulID(r.Context())
 		if id == 0 {
-			http.Error(w, "cant get your soul", http.StatusInternalServerError)
+			utils.WriteError(w, "cant get your soul", http.StatusInternalServerError)
 			return
 		}
 
 		var data registerPixelsData
 		defer r.Body.Close()
 		if err := utils.UnmarshalJSON(r.Body, &data); err != nil {
-			http.Error(w, "invalid form", http.StatusUnprocessableEntity)
+			utils.WriteError(w, "invalid form", http.StatusUnprocessableEntity)
 			return
 		}
 
 		if ok, _ := db.IsPixelFieldInited(r.Context()); ok {
-			http.Error(w, "field already inited", http.StatusAlreadyReported)
+			utils.WriteError(w, "field already inited", http.StatusAlreadyReported)
 			return
 		}
 
 		if err := db.InitPixelField(r.Context(), data.Positions, id, allowedColors["white"]); err != nil {
-			http.Error(w, "cant init pixel field", http.StatusInternalServerError)
+			utils.WriteError(w, "cant init pixel field", http.StatusInternalServerError)
 			return
 		}
 

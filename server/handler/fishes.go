@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -22,8 +21,6 @@ type listFishesResponse struct {
 func listFishes(m *http.ServeMux, db *database.Database) {
 	const path = "GET /fishes"
 	m.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-
 		pageQuery := r.URL.Query().Get("page")
 		page, _ := strconv.ParseInt(pageQuery, 10, 32)
 		if page <= 0 {
@@ -33,7 +30,7 @@ func listFishes(m *http.ServeMux, db *database.Database) {
 
 		seeds, err := db.GetSeeds(r.Context(), 100, page*100)
 		if err != nil {
-			http.Error(w, "Failed to get fishes", http.StatusInternalServerError)
+			utils.WriteError(w, "Failed to get fishes", http.StatusInternalServerError)
 			return
 		}
 
@@ -41,7 +38,7 @@ func listFishes(m *http.ServeMux, db *database.Database) {
 			seeds = make([]string, 0)
 		}
 
-		json.NewEncoder(w).Encode(listFishesResponse{seeds})
+		utils.WriteJSON(w, listFishesResponse{seeds}, http.StatusOK)
 	})
 }
 
@@ -52,21 +49,20 @@ type getFishResponse struct {
 func getFish(m *http.ServeMux, db *database.Database, config *utils.CacheConfig) {
 	const path = "GET /fishes/me"
 	m.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
 		middleware.SetCacheRule(w, time.Duration(config.FishesMe)) // week
 
 		id := middleware.GetSoulID(r.Context())
 		if id == 0 {
-			http.Error(w, "cant get your soul", http.StatusInternalServerError)
+			utils.WriteError(w, "cant get your soul", http.StatusInternalServerError)
 			return
 		}
 
 		seed, err := db.GetSeed(r.Context(), id)
 		if err != nil {
-			http.Error(w, "Cant find your soul in fishes", http.StatusInternalServerError)
+			utils.WriteError(w, "cant find your soul in fishes", http.StatusInternalServerError)
 			return
 		}
 
-		json.NewEncoder(w).Encode(getFishResponse{seed})
+		utils.WriteJSON(w, getFishResponse{seed}, http.StatusOK)
 	})
 }
