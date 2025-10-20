@@ -40,7 +40,7 @@ func (s Server) Run() error {
 	}
 
 	// Register static files
-	router.Handle("/", middleware.Cache(time.Hour*24)(http.FileServerFS(s.staticFiles)))
+	router.Handle("/", middleware.Cache(time.Second*time.Duration(s.config.Caches.StaticFiles))(http.FileServerFS(s.staticFiles)))
 
 	// Register API handler
 	handler.RegisterFishes(router, s.database, &s.config.Caches)

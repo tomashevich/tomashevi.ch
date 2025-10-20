@@ -100,7 +100,7 @@ func paintPixel(m *http.ServeMux, db *database.Database, config *utils.CacheConf
 		}
 
 		if soul.PaintedPixels >= 10 {
-			middleware.SetCacheRule(w, time.Duration(config.PixelsLimit)) // dont send again pls
+			middleware.SetCacheRule(w, time.Second*time.Duration(config.PixelsLimit)) // dont send again pls
 			utils.WriteError(w, "already painted maximum of pixels", http.StatusForbidden)
 			return
 		}

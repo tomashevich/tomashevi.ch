@@ -49,7 +49,7 @@ type getFishResponse struct {
 func getFish(m *http.ServeMux, db *database.Database, config *utils.CacheConfig) {
 	const path = "GET /fishes/me"
 	m.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		middleware.SetCacheRule(w, time.Duration(config.FishesMe)) // week
+		middleware.SetCacheRule(w, time.Second*time.Duration(config.FishesMe)) // week
 
 		id := middleware.GetSoulID(r.Context())
 		if id == 0 {
