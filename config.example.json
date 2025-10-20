@@ -1,0 +1,9 @@
+{
+  "address": ":8037",
+  "database_file": "storage.db",
+  "caches": {
+    "static_files": 86400,
+    "fish_me": 604800,
+    "pixels_limit": 604800
+  }
+}

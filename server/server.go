@@ -9,17 +9,18 @@ import (
 	"tomashevich/server/database"
 	"tomashevich/server/handler"
 	"tomashevich/server/middleware"
+	"tomashevich/utils"
 )
 
 type Server struct {
-	addr        string
+	config      *utils.Config
 	database    *database.Database
 	staticFiles fs.FS
 }
 
-func NewServer(addr string, staticFiles fs.FS, database *database.Database) *Server {
+func NewServer(config *utils.Config, staticFiles fs.FS, database *database.Database) *Server {
 	return &Server{
-		addr,
+		config,
 		database,
 		staticFiles,
 	}
@@ -34,7 +35,7 @@ func (s Server) Run() error {
 	)
 
 	server := http.Server{
-		Addr:    s.addr,
+		Addr:    s.config.Address,
 		Handler: stack(router),
 	}
 
@@ -43,9 +44,9 @@ func (s Server) Run() error {
 
 	// Register API handler
 	handler.RegisterFishes(router, s.database)
-	handler.RegisterPixels(router, s.database)
+	handler.RegisterPixels(router, s.database, &s.config.Caches)
 
-	log.Printf("starting server at %s", s.addr)
+	log.Printf("starting server at %s", s.config.Address)
 
 	return server.ListenAndServe()
 }

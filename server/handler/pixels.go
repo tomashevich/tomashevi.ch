@@ -6,11 +6,12 @@ import (
 	"time"
 	"tomashevich/server/database"
 	"tomashevich/server/middleware"
+	"tomashevich/utils"
 )
 
-func RegisterPixels(m *http.ServeMux, db *database.Database) {
+func RegisterPixels(m *http.ServeMux, db *database.Database, config *utils.CacheConfig) {
 	listPixels(m, db)
-	paintPixel(m, db)
+	paintPixel(m, db, config)
 	registerPixels(m, db)
 }
 
@@ -68,7 +69,7 @@ type paintPixelData struct {
 	Color string `json:"color"`
 }
 
-func paintPixel(m *http.ServeMux, db *database.Database) {
+func paintPixel(m *http.ServeMux, db *database.Database, config *utils.CacheConfig) {
 	const path = "POST /pixels:paint"
 	m.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -104,7 +105,7 @@ func paintPixel(m *http.ServeMux, db *database.Database) {
 		}
 
 		if soul.PaintedPixels >= 10 {
-			middleware.SetCacheRule(w, time.Hour*168) // dont send again pls
+			middleware.SetCacheRule(w, time.Duration(config.PixelsLimit)) // dont send again pls
 			http.Error(w, "already painted maximum of pixels", http.StatusForbidden)
 			return
 		}
