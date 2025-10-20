@@ -88,7 +88,7 @@ func paintPixel(m *http.ServeMux, db *database.Database, config *utils.CacheConf
 
 		var data paintPixelData
 		defer r.Body.Close()
-		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		if err := utils.UnmarshalJSON(r.Body, &data); err != nil {
 			http.Error(w, "invalid form", http.StatusUnprocessableEntity)
 			return
 		}
@@ -134,7 +134,7 @@ func registerPixels(m *http.ServeMux, db *database.Database) {
 
 		var data registerPixelsData
 		defer r.Body.Close()
-		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		if err := utils.UnmarshalJSON(r.Body, &data); err != nil {
 			http.Error(w, "invalid form", http.StatusUnprocessableEntity)
 			return
 		}

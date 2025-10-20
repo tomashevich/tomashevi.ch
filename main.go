@@ -38,6 +38,5 @@ func main() {
 }
 
 /*
-	TODO: make good validation
 	TODO: make good response helper (json, errors)
 */

@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"encoding/json"
 	"os"
 )
 
@@ -25,7 +24,7 @@ func ParseConfig(fileName string) (Config, error) {
 	defer file.Close()
 
 	var config Config
-	if err := json.NewDecoder(file).Decode(&config); err != nil {
+	if err := UnmarshalJSON(file, &config); err != nil {
 		return config, err
 	}
 
@@ -34,8 +33,7 @@ func ParseConfig(fileName string) (Config, error) {
 
 func ParseConfigString(rawJson string) (Config, error) {
 	var config Config
-
-	if err := json.Unmarshal([]byte(rawJson), &config); err != nil {
+	if err := UnmarshalJSONString(rawJson, &config); err != nil {
 		return config, err
 	}
 
