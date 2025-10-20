@@ -36,7 +36,3 @@ func main() {
 	s := server.NewServer(&config, staticFS, db)
 	log.Fatal(s.Run())
 }
-
-/*
-	TODO: make good response helper (json, errors)
-*/
