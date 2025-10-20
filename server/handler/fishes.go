@@ -7,11 +7,12 @@ import (
 	"time"
 	"tomashevich/server/database"
 	"tomashevich/server/middleware"
+	"tomashevich/utils"
 )
 
-func RegisterFishes(m *http.ServeMux, db *database.Database) {
+func RegisterFishes(m *http.ServeMux, db *database.Database, config *utils.CacheConfig) {
 	listFishes(m, db)
-	getFish(m, db)
+	getFish(m, db, config)
 }
 
 type listFishesResponse struct {
@@ -48,11 +49,11 @@ type getFishResponse struct {
 	Seed string `json:"seed"`
 }
 
-func getFish(m *http.ServeMux, db *database.Database) {
+func getFish(m *http.ServeMux, db *database.Database, config *utils.CacheConfig) {
 	const path = "GET /fishes/me"
 	m.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		middleware.SetCacheRule(w, time.Hour*168) // week
+		middleware.SetCacheRule(w, time.Duration(config.FishesMe)) // week
 
 		id := middleware.GetSoulID(r.Context())
 		if id == 0 {

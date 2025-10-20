@@ -43,7 +43,7 @@ func (s Server) Run() error {
 	router.Handle("/", middleware.Cache(time.Hour*24)(http.FileServerFS(s.staticFiles)))
 
 	// Register API handler
-	handler.RegisterFishes(router, s.database)
+	handler.RegisterFishes(router, s.database, &s.config.Caches)
 	handler.RegisterPixels(router, s.database, &s.config.Caches)
 
 	log.Printf("starting server at %s", s.config.Address)
