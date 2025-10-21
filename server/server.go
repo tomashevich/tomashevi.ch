@@ -36,8 +36,11 @@ func (s Server) Run() error {
 	)
 
 	server := http.Server{
-		Addr:    s.config.Address,
-		Handler: stack(router),
+		Addr:         s.config.Server.Address,
+		Handler:      stack(router),
+		ReadTimeout:  time.Duration(s.config.Server.ReadTimeout) * time.Second,
+		WriteTimeout: time.Duration(s.config.Server.WriteTimeout) * time.Second,
+		IdleTimeout:  time.Duration(s.config.Server.IdleTimeout) * time.Second,
 	}
 
 	// Register static files
@@ -47,7 +50,7 @@ func (s Server) Run() error {
 	handler.RegisterFishes(router, s.database, &s.config.Caches)
 	handler.RegisterPixels(router, s.database, &s.config.Caches)
 
-	log.Printf("starting server at %s", s.config.Address)
+	log.Printf("starting server at %s", s.config.Server.Address)
 
 	return server.ListenAndServe()
 }

@@ -5,10 +5,17 @@ import (
 )
 
 type Config struct {
-	Address      string            `json:"address"`       // server addr
 	DatabaseFile string            `json:"database_file"` // sqlite3 database file
+	Server       ServerConfig      `json:"server"`
 	RateLimiter  RateLimiterConfig `json:"ratelimiter"`
 	Caches       CacheConfig       `json:"caches"`
+}
+
+type ServerConfig struct {
+	Address      string `json:"address"`
+	ReadTimeout  int    `json:"read_timeout"`
+	WriteTimeout int    `json:"write_timeout"`
+	IdleTimeout  int    `json:"idle_timeout"`
 }
 
 type RateLimiterConfig struct {

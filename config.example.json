@@ -1,6 +1,11 @@
 {
-  "address": ":8037",
   "database_file": "storage.db",
+  "server": {
+    "address": ":8037",
+    "read_timeout": 5,
+    "write_timeout": 10,
+    "idle_timeout": 60
+  },
   "ratelimiter": {
     "max_requests": 10,
     "in_seconds": 5
