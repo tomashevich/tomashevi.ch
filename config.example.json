@@ -1,6 +1,10 @@
 {
   "address": ":8037",
   "database_file": "storage.db",
+  "ratelimiter": {
+    "max_requests": 10,
+    "in_seconds": 5
+  },
   "caches": {
     "static_files": 86400,
     "fish_me": 604800,

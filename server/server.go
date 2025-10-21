@@ -32,6 +32,7 @@ func (s Server) Run() error {
 	stack := middleware.MiddlewareStack(
 		middleware.Helheim(s.database),
 		middleware.Compress(),
+		middleware.NewRateLimiter(s.config.RateLimiter.MaxRequests, time.Duration(s.config.RateLimiter.InSeconds)*time.Second).Middleware(),
 	)
 
 	server := http.Server{

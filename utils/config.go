@@ -5,9 +5,15 @@ import (
 )
 
 type Config struct {
-	Address      string      `json:"address"`       // server addr
-	DatabaseFile string      `json:"database_file"` // sqlite3 database file
-	Caches       CacheConfig `json:"caches"`
+	Address      string            `json:"address"`       // server addr
+	DatabaseFile string            `json:"database_file"` // sqlite3 database file
+	RateLimiter  RateLimiterConfig `json:"ratelimiter"`
+	Caches       CacheConfig       `json:"caches"`
+}
+
+type RateLimiterConfig struct {
+	MaxRequests int `json:"max_requests"`
+	InSeconds   int `json:"in_seconds"`
 }
 
 type CacheConfig struct {
