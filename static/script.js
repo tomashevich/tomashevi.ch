@@ -390,7 +390,6 @@ document.addEventListener("DOMContentLoaded", () => {
         fish.respawn(seed);
         this.fishes.push(fish);
       }
-      this.fillSeedBuffer();
     }
 
     resize(width, height) {
@@ -405,6 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
     start(seaweedManager) {
       this.fillSeedBuffer();
       setInterval(() => this.addFish(), INFINITE_CANVAS_CONFIG.ADD_FISH_INTERVAL_MS);
+      setInterval(() => this.fillSeedBuffer(), 5000);
       this.animate(seaweedManager);
     }
 
@@ -419,7 +419,6 @@ document.addEventListener("DOMContentLoaded", () => {
           if (seed) {
             fish.respawn(seed);
           }
-          this.fillSeedBuffer();
         }
       }
       requestAnimationFrame(() => this.animate(seaweedManager));
