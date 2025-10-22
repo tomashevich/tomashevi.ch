@@ -3,8 +3,8 @@ package middleware
 import (
 	"context"
 	"net/http"
-	"strings"
 	"tomashevich/server/database"
+	"tomashevich/server/utils"
 
 	"github.com/google/uuid"
 )
@@ -16,7 +16,7 @@ const souldIdKey contextKey = "soulId"
 func Helheim(db *database.Database) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ip := strings.Split(r.RemoteAddr, ":")[0]
+			ip := utils.GetIPAddr(r)
 			var id int
 			if id, _ = db.GetSoulIDByIP(r.Context(), ip); id == 0 {
 				uuid, err := uuid.NewV7()

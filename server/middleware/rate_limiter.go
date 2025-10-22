@@ -3,7 +3,6 @@ package middleware
 import (
 	"net/http"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 	"tomashevich/server/utils"
@@ -52,7 +51,7 @@ func (rl *RateLimiter) Middleware() func(next http.Handler) http.Handler {
 	rl.RunCleaner()
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ip := strings.Split(r.RemoteAddr, ":")[0]
+			ip := utils.GetIPAddr(r)
 			now := time.Now()
 
 			rl.mu.Lock()
