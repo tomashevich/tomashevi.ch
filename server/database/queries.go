@@ -5,12 +5,20 @@ import (
 	"strings"
 )
 
-func (d Database) GiveSoulToHel(ctx context.Context, seed, address string) error {
-	if _, err := d.db.ExecContext(ctx, "INSERT INTO souls (seed, address) VALUES (?, ?)", seed, address); err != nil {
-		return err
+func (d Database) GiveSoulToHel(ctx context.Context, seed, address string) (int, error) {
+	row := d.db.QueryRowContext(ctx, "INSERT INTO souls (seed, address) VALUES (?, ?) RETURNING id", seed, address)
+
+	var id int
+	if row.Err() != nil {
+		return id, row.Err()
 	}
 
-	return nil
+	if err := row.Scan(&id); err != nil {
+		return id, err
+	}
+
+	return id, nil
+
 }
 
 func (d Database) GetSeed(ctx context.Context, id int) (string, error) {

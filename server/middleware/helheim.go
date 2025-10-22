@@ -25,14 +25,13 @@ func Helheim(db *database.Database) func(next http.Handler) http.Handler {
 					return
 				}
 
-				db.GiveSoulToHel(r.Context(), uuid.String(), ip)
+				if id, err = db.GiveSoulToHel(r.Context(), uuid.String(), ip); err != nil {
+					next.ServeHTTP(w, r)
+					return
+				}
 			}
 
-			if id != 0 {
-				r = r.WithContext(context.WithValue(r.Context(), souldIdKey, id))
-			}
-
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), souldIdKey, id)))
 		})
 	}
 }
