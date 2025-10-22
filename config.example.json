@@ -7,7 +7,7 @@
     "idle_timeout": 60
   },
   "ratelimiter": {
-    "max_requests": 10,
+    "max_requests": 15,
     "in_seconds": 5
   },
   "caches": {
