@@ -1,4 +1,50 @@
 `use strict`;
+const originalConsoleError = console.error;
+
+const getMessage = (args) => {
+  let msg = "An unknown error occurred.";
+  for (const arg of args) {
+    if (typeof arg === "string") {
+      try {
+        const o = JSON.parse(arg);
+        if (o && o.details) return o.details;
+      } catch (e) {
+        if (msg === "An unknown error occurred.") msg = arg;
+      }
+    } else if (arg instanceof Error) {
+      if (msg === "An unknown error occurred.") msg = arg.message;
+    } else if (typeof arg === "object" && arg !== null) {
+      if (arg.details) return arg.details;
+      if (arg.message && msg === "An unknown error occurred.") msg = arg.message;
+    }
+  }
+  return msg;
+};
+
+const showNotification = (args) => {
+  const container = document.getElementById("notification-container");
+  if (!container) {
+    originalConsoleError("Notification container not found!");
+    return;
+  }
+
+  const item = document.createElement("div");
+  item.className = "notification-item";
+  item.textContent = getMessage(args);
+
+  container.prepend(item);
+  container.classList.add("show");
+
+  setTimeout(() => {
+    item.remove();
+    if (container.children.length === 0) container.classList.remove("show");
+  }, 5000);
+};
+
+console.error = (...args) => {
+  showNotification(args);
+  originalConsoleError(...args);
+};
 
 window.onload = () => {
   document.body.classList.add("loaded");
@@ -52,7 +98,8 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const response = await fetch("/pixels");
         if (!response.ok) {
-          throw new Error("Failed to load pixels");
+          const errorData = await response.json();
+          throw new Error(JSON.stringify(errorData));
         }
         const data = await response.json();
         const colorMap = Object.fromEntries(Object.entries(data.allowed_colors).map(([name, id]) => [id, name]));
@@ -158,7 +205,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (!response.ok) {
-          console.error("Failed to register pixels");
+          const errorData = await response.json();
+          console.error("Failed to register pixels:", JSON.stringify(errorData));
         }
       } catch (error) {
         console.error("Error registering pixels:", error);
@@ -192,7 +240,8 @@ document.addEventListener("DOMContentLoaded", () => {
           this.ctx.fillRect(pixelX * this.pixelSize, pixelY * this.pixelSize, this.pixelSize, this.pixelSize);
           this.ctx.strokeRect(pixelX * this.pixelSize, pixelY * this.pixelSize, this.pixelSize, this.pixelSize);
         } else {
-          console.error("Failed to paint pixel");
+          const errorData = await response.json();
+          console.error("Failed to paint pixel:", JSON.stringify(errorData));
         }
       } catch (error) {
         console.error("Error:", error);
@@ -927,7 +976,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       try {
         const response = await fetch("/fishes/me");
-        if (!response.ok) throw new Error("Could not fetch user fish.");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(JSON.stringify(errorData));
+        }
         const data = await response.json();
         this.userFishSeed = data.seed;
         return this.userFishSeed;
@@ -944,7 +996,8 @@ document.addEventListener("DOMContentLoaded", () => {
       try {
         const response = await fetch(`/fishes?page=${this.glossaryData.apiPage}`);
         if (!response.ok) {
-          throw new Error(`API request failed for page ${this.glossaryData.apiPage}`);
+          const errorData = await response.json();
+          throw new Error(JSON.stringify(errorData));
         }
         const data = await response.json();
         const newSeeds = data.seeds || [];
