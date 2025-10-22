@@ -369,11 +369,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (error) {
         console.error("Error loading fish seeds:", error);
-        setTimeout(() => {
-          this.isLoading = false;
-          this.fillSeedBuffer();
-        }, INFINITE_CANVAS_CONFIG.FISH_API_RETRY_DELAY_MS);
-        return;
       } finally {
         this.isLoading = false;
       }
