@@ -1,0 +1,10 @@
+.git
+.gitignore
+Dockerfile
+docker-compose.yml
+*.md
+*.log
+*.db*
+config.example.json
+tomashevich
+storage.db

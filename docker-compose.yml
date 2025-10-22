@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  tomashevich:
+    restart: "always"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8037:8037"
+    volumes:
+      - tomashevich_data:/app/
+
+volumes:
+  tomashevich_data:
