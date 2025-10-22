@@ -5,7 +5,7 @@ import (
 	"time"
 	"tomashevich/server/database"
 	"tomashevich/server/middleware"
-	"tomashevich/utils"
+	"tomashevich/server/utils"
 )
 
 func RegisterPixels(m *http.ServeMux, db *database.Database, config *utils.CacheConfig) {

@@ -8,7 +8,7 @@ import (
 
 	"tomashevich/server"
 	"tomashevich/server/database"
-	"tomashevich/utils"
+	"tomashevich/server/utils"
 )
 
 //go:embed static/*

@@ -9,7 +9,7 @@ import (
 	"tomashevich/server/database"
 	"tomashevich/server/handler"
 	"tomashevich/server/middleware"
-	"tomashevich/utils"
+	"tomashevich/server/utils"
 )
 
 type Server struct {

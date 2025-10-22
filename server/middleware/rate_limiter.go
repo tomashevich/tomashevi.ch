@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"tomashevich/utils"
+	"tomashevich/server/utils"
 )
 
 type RequestLimitState struct {
