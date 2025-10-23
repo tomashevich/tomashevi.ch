@@ -6,7 +6,7 @@ using `net/http` 1.24.4
 
 ### Features
 1. Infinity procedural generated fishes background: get visitor soul and insert into database with unique seed (uuidv7)
-2. Pixelbattle in header `tomashevi.ch`: every soul can paint 10 pixels
+2. Pixelbattle in header word `tomashevich`: every soul can paint 10 pixels
 
 ---
 
@@ -18,6 +18,11 @@ or use docker
 
 1. `cp config.example.json config.json` make config file
 2. `docker-compose up --build -d` build docker and start the server
+
+---
+
+### About proxy
+No public proxies allowed, bc we use `X-Forwarded-For` ONLY if r.RemoteAddr is LOCAL. (dont use cloudflare proxy 4 example)
 
 ---
 
