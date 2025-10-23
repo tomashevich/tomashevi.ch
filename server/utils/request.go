@@ -8,8 +8,11 @@ import (
 
 func GetIPAddr(r *http.Request) string {
 	ip := strings.Split(r.RemoteAddr, ":")[0]
-	if net.ParseIP(ip).IsPrivate() {
-		ip = r.Header.Get("X-Forwarded-For")
+	if netIp := net.ParseIP(ip); netIp.IsPrivate() || netIp.IsLoopback() {
+		if header_ip := r.Header.Get("X-Forwarded-For"); net.ParseIP(header_ip) != nil {
+			ip = header_ip
+		}
+
 	}
 	return ip
 }
