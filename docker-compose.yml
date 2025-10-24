@@ -9,7 +9,7 @@ services:
     ports:
       - "8037:8037"
     volumes:
-      - tomashevich_data:/app/
+      - tomashevich_data:/app/data/
 
 volumes:
   tomashevich_data:
