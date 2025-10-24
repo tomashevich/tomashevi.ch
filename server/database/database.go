@@ -3,6 +3,8 @@ package database
 import (
 	"database/sql"
 	"log"
+	"os"
+	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -11,8 +13,10 @@ type Database struct {
 	db *sql.DB
 }
 
-func NewDatabase(database string) (*Database, error) {
-	db, err := sql.Open("sqlite3", database)
+func NewDatabase(pathToDatabase string) (*Database, error) {
+	os.MkdirAll(filepath.Dir(pathToDatabase), os.ModePerm)
+
+	db, err := sql.Open("sqlite3", pathToDatabase)
 	if err != nil {
 		return nil, err
 	}
