@@ -162,7 +162,7 @@ header {
 }
 
 .player-footer {
-    position: fixed;
+    position: sticky;
     bottom: 1rem;
     left: 0;
     right: 0;
