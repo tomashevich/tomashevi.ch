@@ -1,5 +1,5 @@
 {
-  "database_file": "storage.db",
+  "database_file": "data/storage.db",
   "server": {
     "address": ":8037",
     "is_behind_proxy": false,
