@@ -2,6 +2,7 @@
   "database_file": "storage.db",
   "server": {
     "address": ":8037",
+    "is_behind_proxy": false,
     "read_timeout": 5,
     "write_timeout": 10,
     "idle_timeout": 60

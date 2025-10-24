@@ -12,10 +12,11 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Address      string `json:"address"`
-	ReadTimeout  int    `json:"read_timeout"`
-	WriteTimeout int    `json:"write_timeout"`
-	IdleTimeout  int    `json:"idle_timeout"`
+	Address       string `json:"address"`
+	IsBehindProxy bool   `json:"is_behind_proxy"`
+	ReadTimeout   int    `json:"read_timeout"`
+	WriteTimeout  int    `json:"write_timeout"`
+	IdleTimeout   int    `json:"idle_timeout"`
 }
 
 type RateLimiterConfig struct {

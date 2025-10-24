@@ -47,11 +47,11 @@ func (rl *RateLimiter) RunCleaner() {
 	}()
 }
 
-func (rl *RateLimiter) Middleware() func(next http.Handler) http.Handler {
+func (rl *RateLimiter) Middleware(isBehindProxy bool) func(next http.Handler) http.Handler {
 	rl.RunCleaner()
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ip := utils.GetIPAddr(r)
+			ip := utils.GetIPAddr(r, isBehindProxy)
 			now := time.Now()
 
 			rl.mu.Lock()

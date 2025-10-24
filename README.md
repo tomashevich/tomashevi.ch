@@ -22,7 +22,7 @@ or use docker
 ---
 
 ### About proxy
-No public proxies allowed, bc we use `X-Forwarded-For` ONLY if r.RemoteAddr is LOCAL. (dont use cloudflare proxy 4 example)
+Enable `server.is_behind_proxy` in `config.json`, we use `X-Forwarded-For` ONLY if r.RemoteAddr is LOCAL. (dont use cloudflare proxy 4 example)
 
 ---
 

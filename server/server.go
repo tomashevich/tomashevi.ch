@@ -30,9 +30,9 @@ func (s Server) Run() error {
 	router := http.NewServeMux()
 
 	stack := middleware.MiddlewareStack(
-		middleware.Helheim(s.database),
+		middleware.Helheim(s.database, s.config.Server.IsBehindProxy),
 		middleware.Compress(),
-		middleware.NewRateLimiter(s.config.RateLimiter.MaxRequests, time.Duration(s.config.RateLimiter.InSeconds)*time.Second).Middleware(),
+		middleware.NewRateLimiter(s.config.RateLimiter.MaxRequests, time.Duration(s.config.RateLimiter.InSeconds)*time.Second).Middleware(s.config.Server.IsBehindProxy),
 	)
 
 	server := http.Server{

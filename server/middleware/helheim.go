@@ -13,10 +13,10 @@ type contextKey string
 
 const souldIdKey contextKey = "soulId"
 
-func Helheim(db *database.Database) func(next http.Handler) http.Handler {
+func Helheim(db *database.Database, isBehindProxy bool) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ip := utils.GetIPAddr(r)
+			ip := utils.GetIPAddr(r, isBehindProxy)
 			var id int
 			if id, _ = db.GetSoulIDByIP(r.Context(), ip); id == 0 {
 				uuid, err := uuid.NewV7()
